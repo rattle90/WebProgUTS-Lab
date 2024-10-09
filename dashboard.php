@@ -17,10 +17,10 @@
     </style>
 </head>
 
-<body class="bg-blue-600 h-screen flex items-center justify-center">
+<body class="bg-blue-600 h-full">
 
     <!-- Main Container with Flex for Centering -->
-    <div class="flex h-full w-11/12 space-x-6">
+    <div class="flex h-full w-11/12 space-x-6 mx-auto">
 
         <!-- Bubble for Sidebar -->
         <div class="w-1/3 bg-gray-900 text-white p-4 rounded-lg shadow-lg mb-6">

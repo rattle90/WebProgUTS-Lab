@@ -11,10 +11,9 @@
   <!-- Include Navbar -->
   <?php include 'component/navbar.php'; ?>
 
-  <!-- Main Content -->
-  <div class="p-6">
-    <h1 class="text-2xl font-bold text-gray-800">Welcome to the Dashboard</h1>
-    <p class="mt-2 text-gray-600">This is the main content area. Customize it as needed.</p>
+  <!-- Main Content (Dashboard Container) -->
+  <div class="pt-20"> <!-- Adjust padding to give space under the navbar -->
+    <?php include 'dashboard.php'; ?>
   </div>
 </body>
 </html>
