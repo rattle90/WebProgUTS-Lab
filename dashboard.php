@@ -5,13 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>To-Do Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Define Font Family in Style -->
+    <style>
+        body {
+            font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, 'Roboto', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+        }
+    </style>
 </head>
-<body class="bg-blue-600 h-screen">
-    <!-- Main Container -->
-    <div class="flex h-full">
-        
-        <!-- Sidebar -->
-        <div class="w-1/3 bg-gray-900 text-white p-4 flex flex-col">
+
+<body class="bg-blue-600 h-screen flex items-center justify-center">
+
+    <!-- Main Container with Flex for Centering -->
+    <div class="flex h-full w-11/12 space-x-6">
+
+        <!-- Bubble for Sidebar -->
+        <div class="w-1/3 bg-gray-900 text-white p-4 rounded-lg shadow-lg mb-6">
             <div class="flex justify-between mb-4">
                 <h1 class="text-xl font-semibold">All my tasks</h1>
                 <button class="text-gray-400">View</button>
@@ -27,9 +39,9 @@
             </ul>
             <button class="mt-auto p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg">+ Add task</button>
         </div>
-        
-        <!-- Main Content -->
-        <div class="w-2/3 bg-gray-100 p-6">
+
+        <!-- Bubble for Task Details -->
+        <div class="w-2/3 bg-gray-100 p-6 rounded-lg shadow-lg mb-6">
             <!-- Task Header -->
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-semibold">Do laundry</h2>
