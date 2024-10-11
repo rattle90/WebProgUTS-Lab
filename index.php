@@ -52,7 +52,7 @@ $tasks = $query->fetchAll(PDO::FETCH_ASSOC);
 
     <!-- Add task modal (hidden initially) -->
     <div id="add-task-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-        <div class="bg-white p-4 rounded-lg shadow-lg w-96">
+        <div class="bg-white p-4 rounded-lg shadow-lg w-1/3 relative" id="modal-content">
             <h2 class="text-xl font-semibold mb-4">Add New Task</h2>
             <form id="add-task-form">
                 <input type="text" name="task_name" placeholder="Task Name" class="p-2 border rounded-md w-full mb-3" required>
@@ -95,6 +95,14 @@ $tasks = $query->fetchAll(PDO::FETCH_ASSOC);
         // Show the add task modal
         document.getElementById('add-task-btn').addEventListener('click', () => {
             document.getElementById('add-task-modal').classList.remove('hidden');
+        });
+
+        // Close modal when clicking outside the form
+        document.getElementById('add-task-modal').addEventListener('click', (e) => {
+            const modalContent = document.getElementById('modal-content');
+            if (!modalContent.contains(e.target)) {
+                document.getElementById('add-task-modal').classList.add('hidden');
+            }
         });
 
         // Handle add task form submission
