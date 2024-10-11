@@ -28,9 +28,6 @@
                 <h1 class="text-xl font-semibold">All my tasks</h1>
                 <button class="text-gray-400">View</button>
             </div>
-            <div class="mb-6">
-                <input type="text" placeholder="Filter" class="w-full bg-gray-800 text-gray-400 p-2 rounded-lg">
-            </div>
             <ul class="space-y-3">
                 <li class="bg-gray-700 p-3 rounded-md">Today</li>
                 <li class="hover:bg-gray-700 p-3 rounded-md cursor-pointer">Tomorrow</li>
