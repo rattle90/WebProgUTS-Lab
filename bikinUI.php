@@ -27,12 +27,12 @@ $today = date('Y-m-d');
     </style>
 </head>
 
-<body class="bg-gray-100 h-screen">
+<body class="bg-white h-screen">
 
     <div class="max-w-4xl mx-auto py-10">
 
         <div class="mb-6">
-            <h1 class="text-3xl font-bold">Today</h1>
+            <h1 class="text-2xl font-black">Today</h1>
             <!-- diisi sama select * todolist totaldata -->
             <p class="text-gray-500">5 tasks</p>
         </div>
