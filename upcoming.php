@@ -1,15 +1,35 @@
 <?php
-include 'db.php'; // Database connection
+include 'db.php';
 include 'component/navbar.php';
 
-// Fetch tasks from the database
-$query = $pdo->query("SELECT * FROM tasks ORDER BY due_date ASC");
-$tasks = $query->fetchAll(PDO::FETCH_ASSOC);
-$today = date('Y-m-d');
+// Set timezone
+date_default_timezone_set('Asia/Jakarta');
 
-// Filter tasks for today and upcoming
-$today_tasks = array_filter($tasks, fn($task) => $task['due_date'] == $today);
-$upcoming_tasks = array_filter($tasks, fn($task) => $task['due_date'] > $today);
+// Get selected month or default to the current month
+$selected_month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
+$start_date = $selected_month . '-01';
+$end_date = date('Y-m-t', strtotime($start_date)); // Get the last date of the selected month
+
+// Fetch tasks for the selected month from the database
+$query = $pdo->prepare("SELECT * FROM tasks WHERE due_date BETWEEN :start_date AND :end_date ORDER BY due_date ASC");
+$query->execute(['start_date' => $start_date, 'end_date' => $end_date]);
+$tasks = $query->fetchAll(PDO::FETCH_ASSOC);
+
+// Group tasks by date
+$grouped_tasks = [];
+foreach ($tasks as $task) {
+    $due_date = $task['due_date'];
+    if (!isset($grouped_tasks[$due_date])) {
+        $grouped_tasks[$due_date] = [];
+    }
+    $grouped_tasks[$due_date][] = $task;
+}
+
+// Get all months for the dropdown
+$months = [];
+for ($i = -6; $i <= 6; $i++) { // Show 6 months before and after the current month
+    $months[] = date('Y-m', strtotime("$i month"));
+}
 ?>
 
 <!DOCTYPE html>
@@ -24,55 +44,89 @@ $upcoming_tasks = array_filter($tasks, fn($task) => $task['due_date'] > $today);
         body {
             font-family: 'Inter', sans-serif;
         }
+        .scroll-to {
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .scroll-to:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
     </style>
 </head>
 
 <body class="bg-white h-screen">
 
     <div class="max-w-4xl mx-auto py-10">
-        <div class="mb-6">
+        <div class="mb-6 flex justify-between items-center">
             <h1 class="text-2xl font-black">Upcoming Tasks</h1>
-            <p class="text-gray-500"><?= count($upcoming_tasks) ?> tasks</p>
+            
+            <!-- Dropdown to select month -->
+            <form action="" method="GET">
+                <label for="month" class="text-lg font-bold">Select Month: </label>
+                <select name="month" id="month" class="p-2 border border-gray-300 rounded-md" onchange="this.form.submit()">
+                    <?php foreach ($months as $month): ?>
+                        <option value="<?= $month ?>" <?= $selected_month == $month ? 'selected' : '' ?>>
+                            <?= date('F Y', strtotime($month)) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </form>
         </div>
 
-        <div>
-            <h2 class="text-base font-black">Today</h2>
-            <hr class="border-t border-gray-300 w-full my-2">
-            <ul class="space-y-4">
-                <?php foreach ($today_tasks as $task): ?>
-                    <li class="flex items-center justify-between bg-white p-4 rounded-lg shadow-md">
-                        <div>
-                            <input type="checkbox" id="task-<?= $task['id'] ?>" class="mr-3 task-checkbox" data-task-id="<?= $task['id'] ?>" <?= $task['is_completed'] ? 'checked' : '' ?>>
-                            <label for="task-<?= $task['id'] ?>" class="text-gray-700"><?= htmlspecialchars($task['task_name']) ?></label>
-                            <p class="text-gray-400 text-sm"><?= htmlspecialchars($task['due_date']) ?></p>
-                        </div>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
+        <!-- Taskbar with days of the selected month -->
+        <div class="flex space-x-4 overflow-x-auto pb-4">
+            <?php
+            $current_day = strtotime(date('Y-m-d')); // Hari ini
+            $end_day = strtotime('+6 days', $current_day); // 6 hari ke depan
+
+            // Menampilkan tanggal dari hari ini hingga 6 hari ke depan
+            while ($current_day <= $end_day) {
+                $formatted_day = date('D j', $current_day); // Format tampilan: Mon 21
+                $id_day = date('Y-m-d', $current_day); // Digunakan untuk ID scroll
+
+                echo '<div class="scroll-to p-2" data-target="#task-'.$id_day.'">';
+                echo '<div class="text-center text-sm font-bold">'.date('D', $current_day).'</div>';
+                echo '<div class="text-center text-lg font-bold">'.date('j', $current_day).'</div>';
+                echo '</div>';
+
+                // Increment day by 1
+                $current_day = strtotime('+1 day', $current_day);
+            }
+            ?>
         </div>
 
-        <div class="mt-8">
-            <h2 class="text-base font-black">Upcoming</h2>
-            <hr class="border-t border-gray-300 w-full my-2">
-            <ul class="space-y-4">
-                <?php foreach ($upcoming_tasks as $task): ?>
-                    <li class="flex items-center justify-between bg-white p-4 rounded-lg shadow-md">
-                        <div>
-                            <input type="checkbox" id="task-<?= $task['id'] ?>" class="mr-3 task-checkbox" data-task-id="<?= $task['id'] ?>" <?= $task['is_completed'] ? 'checked' : '' ?>>
-                            <label for="task-<?= $task['id'] ?>" class="text-gray-700"><?= htmlspecialchars($task['task_name']) ?></label>
-                            <p class="text-gray-400 text-sm"><?= htmlspecialchars($task['due_date']) ?></p>
-                        </div>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
-        </div>
+        <!-- Tasks grouped by date -->
+        <?php foreach ($grouped_tasks as $date => $tasks_for_date): ?>
+            <div class="mt-8" id="task-<?= htmlspecialchars($date) ?>">
+                <?php
+                // Format the date to display day name, date, and month abbreviation (e.g., Senin, 21 Okt)
+                $formatted_date = date('l, j M', strtotime($date)); // 'l' is for full day name
+                ?>
+                <h2 class="text-base font-black">
+                    <?= htmlspecialchars($formatted_date) ?> <!-- Tampilkan hari, tanggal, dan bulan singkatan -->
+                </h2>
+                <hr class="border-t border-gray-300 w-full my-2">
+                <ul class="space-y-4">
+                    <?php foreach ($tasks_for_date as $task): ?>
+                        <li class="flex items-center justify-between bg-white p-4 rounded-lg shadow-md">
+                            <div>
+                                <input type="checkbox" id="task-<?= $task['id'] ?>" class="mr-3 task-checkbox" data-task-id="<?= $task['id'] ?>" <?= $task['is_completed'] ? 'checked' : '' ?>>
+                                <label for="task-<?= $task['id'] ?>" class="text-gray-700"><?= htmlspecialchars($task['task_name']) ?></label>
+                            </div>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+                <button class="flex items-center text-gray-500 hover:text-gray-700 mt-4" id="add-task-btn-<?= $date ?>">
+                    <span class="text-red-500 text-xl mr-2">+</span>
+                    <span>Add task</span>
+                </button>
+            </div>
+        <?php endforeach; ?>
 
-        <div class="mt-8">
-            <button class="flex items-center text-gray-500 hover:text-gray-700" id="add-task-btn">
-                <span class="text-red-500 text-xl mr-2">+</span>
-                <span>Add task</span>
-            </button>
-        </div>
+        <!-- If no tasks for selected month -->
+        <?php if (empty($grouped_tasks)): ?>
+            <p class="text-gray-500 mt-10">No tasks found for this month.</p>
+        <?php endif; ?>
     </div>
 
     <!-- Add Task Modal -->
@@ -84,7 +138,7 @@ $upcoming_tasks = array_filter($tasks, fn($task) => $task['due_date'] > $today);
                     <input type="date" name="due_date" class="p-2 text-lg font-semibold border-b w-full focus:outline-none mb-2" required>
                 </div>
                 <div class="flex space-x-2">
-                    <button type="button" class="bg-gray-100 text-gray-600 px-4 py-2 rounded-md">Cancel</button>
+                    <button type="button" class="bg-gray-100 text-gray-600 px-4 py-2 rounded-md" id="cancel-task-btn">Cancel</button>
                     <button type="submit" class="bg-red-400 text-white px-4 py-2 rounded-md">Add task</button>
                 </div>
             </form>
@@ -92,19 +146,21 @@ $upcoming_tasks = array_filter($tasks, fn($task) => $task['due_date'] > $today);
     </div>
 
     <script>
-        document.getElementById('add-task-form').addEventListener('submit', function (e) {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            fetch('add_task.php', {
-                method: 'POST',
-                body: formData
-            }).then(() => {
-                window.location.reload();
+        // Scroll to task section when date is clicked in the taskbar
+        document.querySelectorAll('.scroll-to').forEach(item => {
+            item.addEventListener('click', function() {
+                const target = document.querySelector(this.getAttribute('data-target'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
             });
         });
 
-        document.getElementById('add-task-btn').addEventListener('click', function () {
-            document.getElementById('add-task-modal').classList.remove('hidden');
+        // Modal control for adding tasks
+        document.querySelectorAll('[id^="add-task-btn-"]').forEach(button => {
+            button.addEventListener('click', function () {
+                document.getElementById('add-task-modal').classList.remove('hidden');
+            });
         });
 
         document.getElementById('add-task-modal').addEventListener('click', (e) => {
@@ -114,20 +170,18 @@ $upcoming_tasks = array_filter($tasks, fn($task) => $task['due_date'] > $today);
             }
         });
 
-        document.querySelectorAll('.task-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', function () {
-                const taskId = this.dataset.taskId;
-                const isCompleted = this.checked ? 1 : 0;
+        document.getElementById('cancel-task-btn').addEventListener('click', function () {
+            document.getElementById('add-task-modal').classList.add('hidden');
+        });
 
-                fetch('update_task.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ id: taskId, is_completed: isCompleted })
-                }).then(() => {
-                    // Optionally reload or update the UI here
-                });
+        document.getElementById('add-task-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            fetch('add_task.php', {
+                method: 'POST',
+                body: formData
+            }).then(() => {
+                window.location.reload();
             });
         });
     </script>
