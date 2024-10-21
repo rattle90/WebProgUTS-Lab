@@ -1,5 +1,6 @@
 <?php
 include 'db.php'; // Koneksi database
+include 'component/navbar.php';
 
 // Ambil semua task dari database
 $query = $pdo->query("SELECT * FROM tasks");
@@ -50,12 +51,12 @@ $groupedTasks = groupTasksByDueDate($tasks);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Poppins', sans-serif; } /* Menggunakan Poppins */
     </style>
 </head>
-<body class="bg-blue-600 h-screen">
+<body class="bg-blue-600 pt-20 h-screen">
     <div class="flex h-full w-11/12 space-x-6 mx-auto py-10">
 
         <!-- Sidebar untuk Daftar Semua Tugas -->
@@ -73,11 +74,12 @@ $groupedTasks = groupTasksByDueDate($tasks);
                                 <div class="flex items-center">
                                     <div class="w-1 h-full bg-green-500 mr-3"></div> <!-- Lis hijau di kiri -->
                                     <input type="checkbox" id="task-<?= $task['id'] ?>" class="mr-3 task-checkbox"
-                                           data-task-id="<?= $task['id'] ?>" <?= $task['status'] == 'complete' ? 'checked' : '' ?>>
-                                    <label for="task-<?= $task['id'] ?>" class="task-label <?= $task['status'] == 'complete' ? 'line-through' : '' ?>">
+                                           data-task-id="<?= $task['id'] ?>" <?= $task['is_completed'] == 1 ? 'checked' : '' ?>>
+                                    <label for="task-<?= $task['id'] ?>" class="task-label <?= $task['is_completed'] == 1 ? 'line-through' : '' ?>">
                                         <?= htmlspecialchars($task['task_name']) ?>
                                     </label>
                                 </div>
+                                <span class="text-gray-300"><?= (new DateTime($task['due_date']))->format('M d') ?></span> <!-- Tanggal jatuh tempo -->
                             </li>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -102,10 +104,10 @@ $groupedTasks = groupTasksByDueDate($tasks);
         <div class="bg-white p-4 rounded-lg shadow-lg w-1/3 relative" id="modal-content">
             <h2 class="text-xl font-semibold mb-4">Add New Task</h2>
             <form id="add-task-form">
-            <input type="text" name="task_name" placeholder="Task Name" class="p-2 border rounded-md w-full mb-3" required>
-            <textarea name="notes" placeholder="Notes" class="p-2 border rounded-md w-full mb-3"></textarea>
-            <input type="date" name="due_date" class="p-2 border rounded-md w-full mb-3" required>
-            <button type="submit" class="bg-blue-600 text-white p-2 rounded-md w-full">Add Task</button>
+                <input type="text" name="task_name" placeholder="Task Name" class="p-2 border rounded-md w-full mb-3" required>
+                <textarea name="notes" placeholder="Notes" class="p-2 border rounded-md w-full mb-3"></textarea>
+                <input type="date" name="due_date" class="p-2 border rounded-md w-full mb-3" required>
+                <button type="submit" class="bg-blue-600 text-white p-2 rounded-md w-full">Add Task</button>
             </form>
         </div>
     </div>
@@ -124,7 +126,7 @@ $groupedTasks = groupTasksByDueDate($tasks);
                         </div>
                         <div class="bg-white p-4 mt-6 rounded-lg shadow-lg">
                             <h3 class="text-xl font-semibold">${data.task_name}</h3>
-                            <p class="text-gray-600">Status: ${data.status}</p>
+                            <p class="text-gray-600">Status: ${data.is_completed ? 'Completed' : 'Pending'}</p>
                             <p class="text-gray-600">Due Date: ${data.due_date}</p> <!-- Menambahkan tanggal jatuh tempo -->
                             <h4 class="text-lg font-semibold mt-4">Notes</h4>
                             <p class="text-gray-600">${data.notes}</p>
@@ -137,7 +139,22 @@ $groupedTasks = groupTasksByDueDate($tasks);
         function markTaskComplete(taskId) {
             fetch(`mark_complete.php?task_id=${taskId}`, { method: 'POST' })
                 .then(() => {
-                    document.getElementById(`task-${taskId}`).checked = true;
+                    const checkbox = document.getElementById(`task-${taskId}`);
+                    checkbox.checked = true; // Tandai checkbox
+                    const label = document.querySelector(`label[for="task-${taskId}"]`);
+                    label.classList.add('line-through'); // Tambahkan garis tengah
+                    loadTaskDetails(taskId);  // Refresh task details
+                });
+        }
+
+        // Fungsi untuk tandai task sebagai belum selesai via AJAX
+        function markTaskUncomplete(taskId) {
+            fetch(`mark_uncomplete.php?task_id=${taskId}`, { method: 'POST' })
+                .then(() => {
+                    const checkbox = document.getElementById(`task-${taskId}`);
+                    checkbox.checked = false; // Hilangkan centang
+                    const label = document.querySelector(`label[for="task-${taskId}"]`);
+                    label.classList.remove('line-through'); // Hilangkan garis tengah
                     loadTaskDetails(taskId);  // Refresh task details
                 });
         }
@@ -155,28 +172,31 @@ $groupedTasks = groupTasksByDueDate($tasks);
             }
         });
 
-        // Handle submit form untuk menambah task
+        // Menangani submit form untuk menambah task
         document.getElementById('add-task-form').addEventListener('submit', (e) => {
-            e.preventDefault();
+            e.preventDefault(); // Mencegah reload
             const formData = new FormData(e.target);
+
             fetch('add_task.php', {
                 method: 'POST',
                 body: formData
-            }).then(() => {
-                window.location.reload();  // Reload halaman setelah menambah task
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload(); // Reload halaman untuk melihat task baru
+                }
             });
         });
 
-        // Update tampilan checklist
+        // Menangani perubahan pada checkbox untuk menandai task sebagai selesai/belum
         document.querySelectorAll('.task-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', function () {
-                const taskId = this.getAttribute('data-task-id');
-                const label = document.querySelector(`label[for="task-${taskId}"]`);
-                
+            checkbox.addEventListener('change', function() {
+                const taskId = this.dataset.taskId;
                 if (this.checked) {
-                    label.classList.add('line-through');
+                    markTaskComplete(taskId);
                 } else {
-                    label.classList.remove('line-through');
+                    markTaskUncomplete(taskId);
                 }
             });
         });
