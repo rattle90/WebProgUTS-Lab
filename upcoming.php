@@ -3,13 +3,13 @@ include 'db.php'; // Database connection
 include 'component/navbar.php';
 
 // Fetch tasks from the database
-$query = $pdo->query("SELECT * FROM tasks");
+$query = $pdo->query("SELECT * FROM tasks ORDER BY due_date ASC");
 $tasks = $query->fetchAll(PDO::FETCH_ASSOC);
 $today = date('Y-m-d');
 
-// Count tasks for display
-$overdue_count = count(array_filter($tasks, fn($task) => $task['status'] == 'overdue'));
-$today_count = count(array_filter($tasks, fn($task) => $task['due_date'] == $today));
+// Filter tasks for today and upcoming
+$today_tasks = array_filter($tasks, fn($task) => $task['due_date'] == $today);
+$upcoming_tasks = array_filter($tasks, fn($task) => $task['due_date'] > $today);
 ?>
 
 <!DOCTYPE html>
@@ -17,7 +17,7 @@ $today_count = count(array_filter($tasks, fn($task) => $task['due_date'] == $tod
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Dashboard</title>
+    <title>Task Dashboard - Upcoming</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -31,42 +31,38 @@ $today_count = count(array_filter($tasks, fn($task) => $task['due_date'] == $tod
 
     <div class="max-w-4xl mx-auto py-10">
         <div class="mb-6">
-            <h1 class="text-2xl font-black">Today</h1>
-            <p class="text-gray-500"><?= $today_count ?> tasks</p>
+            <h1 class="text-2xl font-black">Upcoming Tasks</h1>
+            <p class="text-gray-500"><?= count($upcoming_tasks) ?> tasks</p>
         </div>
 
-        <div class="mb-8">
-            <h2 class="text-base font-black">Overdue</h2>
+        <div>
+            <h2 class="text-base font-black">Today</h2>
             <hr class="border-t border-gray-300 w-full my-2">
             <ul class="space-y-4">
-                <?php foreach ($tasks as $task): ?>
-                    <?php if ($task['status'] == 'overdue'): ?>
-                        <li class="flex items-center justify-between bg-white p-4 rounded-lg shadow-md border-l-4 border-red-500">
-                            <div>
-                                <input type="checkbox" id="task-<?= $task['id'] ?>" class="mr-3 task-checkbox" data-task-id="<?= $task['id'] ?>" <?= $task['is_completed'] ? 'checked' : '' ?>>
-                                <label for="task-<?= $task['id'] ?>" class="text-gray-700"><?= htmlspecialchars($task['task_name']) ?></label>
-                                <p class="text-gray-400 text-sm"><?= htmlspecialchars($task['due_date']) ?></p>
-                            </div>
-                        </li>
-                    <?php endif; ?>
+                <?php foreach ($today_tasks as $task): ?>
+                    <li class="flex items-center justify-between bg-white p-4 rounded-lg shadow-md">
+                        <div>
+                            <input type="checkbox" id="task-<?= $task['id'] ?>" class="mr-3 task-checkbox" data-task-id="<?= $task['id'] ?>" <?= $task['is_completed'] ? 'checked' : '' ?>>
+                            <label for="task-<?= $task['id'] ?>" class="text-gray-700"><?= htmlspecialchars($task['task_name']) ?></label>
+                            <p class="text-gray-400 text-sm"><?= htmlspecialchars($task['due_date']) ?></p>
+                        </div>
+                    </li>
                 <?php endforeach; ?>
             </ul>
         </div>
 
-        <div>
-            <h2 class="text-base font-black"><?= date("d M") . " · Today · " . date("l"); ?></h2>
+        <div class="mt-8">
+            <h2 class="text-base font-black">Upcoming</h2>
             <hr class="border-t border-gray-300 w-full my-2">
             <ul class="space-y-4">
-                <?php foreach ($tasks as $task): ?>
-                    <?php if ($task['due_date'] == $today): ?>
-                        <li class="flex items-center justify-between bg-white p-4 rounded-lg shadow-md">
-                            <div>
-                                <input type="checkbox" id="task-<?= $task['id'] ?>" class="mr-3 task-checkbox" data-task-id="<?= $task['id'] ?>" <?= $task['is_completed'] ? 'checked' : '' ?>>
-                                <label for="task-<?= $task['id'] ?>" class="text-gray-700"><?= htmlspecialchars($task['task_name']) ?></label>
-                                <p class="text-gray-400 text-sm"><?= htmlspecialchars($task['due_date']) ?></p>
-                            </div>
-                        </li>
-                    <?php endif; ?>
+                <?php foreach ($upcoming_tasks as $task): ?>
+                    <li class="flex items-center justify-between bg-white p-4 rounded-lg shadow-md">
+                        <div>
+                            <input type="checkbox" id="task-<?= $task['id'] ?>" class="mr-3 task-checkbox" data-task-id="<?= $task['id'] ?>" <?= $task['is_completed'] ? 'checked' : '' ?>>
+                            <label for="task-<?= $task['id'] ?>" class="text-gray-700"><?= htmlspecialchars($task['task_name']) ?></label>
+                            <p class="text-gray-400 text-sm"><?= htmlspecialchars($task['due_date']) ?></p>
+                        </div>
+                    </li>
                 <?php endforeach; ?>
             </ul>
         </div>
