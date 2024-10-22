@@ -146,8 +146,8 @@ for ($i = -6; $i <= 6; $i++) { // Show 6 months before and after the current mon
                         class="p-2 text-lg font-semibold border-b w-full focus:outline-none mb-2" required>
                     <textarea id="notes" placeholder="Notes" name="notes" class="p-2 border rounded-md w-full"></textarea>
 
-                    <input type="date" id="due-date-input" class="gray p-2" name="due_date" readonly>
-                </div>
+                    <input type="hidden" id="due-date-input" class="p-2 bg-transparent border-none opacity-0 pointer-events-none" name="due_date" readonly>
+                    </div>
                 <div class="flex space-x-2">
                     <button type="button" class="bg-gray-100 text-gray-600 px-4 py-2 rounded-md"
                         id="cancel-task-btn">Cancel</button>
