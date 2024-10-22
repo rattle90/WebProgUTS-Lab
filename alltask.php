@@ -15,7 +15,7 @@ function groupTasksByDueDate($tasks) {
         'later' => [],
     ];
 
-    $today = new DateTime('now', new DateTimeZone('Asia/Jakarta')); // Mengatur timezone sesuai
+    $today = new DateTime('now', new DateTimeZone('Asia/Jakarta'));
     $tomorrow = (clone $today)->modify('+1 day');
     $endOfWeek = (clone $today)->modify('Sunday this week');
 
@@ -97,11 +97,11 @@ switch ($filter) {
                     <h2 class="text-lg font-semibold text-gray-300 mt-4"><?= ucfirst(str_replace('_', ' ', $group)) ?></h2>
                     <?php if (!empty($tasks)): ?>
                         <?php foreach ($tasks as $task): ?>
-                            <li class="flex items-center justify-between bg-gray-700 p-3 rounded-md cursor-pointer hover:bg-gray-600">
+                            <li class="flex items-center justify-between bg-gray-700 p-3 rounded-md cursor-pointer hover:bg-gray-600" id="task-<?= $task['id'] ?>" onclick="loadTaskDetails(<?= $task['id'] ?>)">
                                 <div class="flex items-center">
                                     <div class="w-1 h-full bg-green-500 mr-3"></div>
-                                    <input type="checkbox" id="task-<?= $task['id'] ?>" class="mr-3 task-checkbox" data-task-id="<?= $task['id'] ?>" <?= $task['is_completed'] == 1 ? 'checked' : '' ?>>
-                                    <label for="task-<?= $task['id'] ?>" class="task-label <?= $task['is_completed'] == 1 ? 'line-through' : '' ?>">
+                                    <input type="checkbox" id="checkbox-<?= $task['id'] ?>" class="mr-3 task-checkbox" data-task-id="<?= $task['id'] ?>" <?= $task['is_completed'] == 1 ? 'checked' : '' ?>>
+                                    <label for="checkbox-<?= $task['id'] ?>" class="task-label <?= $task['is_completed'] == 1 ? 'line-through' : '' ?>">
                                         <?= htmlspecialchars($task['task_name']) ?>
                                     </label>
                                 </div>
@@ -144,7 +144,7 @@ switch ($filter) {
     <script>
         function filterTasks() {
             const filter = document.getElementById('task-filter').value;
-            window.location.href = `index.php?filter=${filter}`;
+            window.location.href = `alltask.php?filter=${filter}`;
         }
 
         function loadTaskDetails(taskId) {
@@ -171,9 +171,9 @@ switch ($filter) {
         function markTaskComplete(taskId) {
             fetch(`mark_complete.php?task_id=${taskId}`, { method: 'POST' })
                 .then(() => {
-                    const checkbox = document.getElementById(`task-${taskId}`);
+                    const checkbox = document.getElementById(`checkbox-${taskId}`);
                     checkbox.checked = true;
-                    const label = document.querySelector(`label[for="task-${taskId}"]`);
+                    const label = document.querySelector(`label[for="checkbox-${taskId}"]`);
                     label.classList.add('line-through');
                     loadTaskDetails(taskId);
                 });
@@ -182,9 +182,9 @@ switch ($filter) {
         function markTaskUncomplete(taskId) {
             fetch(`mark_uncomplete.php?task_id=${taskId}`, { method: 'POST' })
                 .then(() => {
-                    const checkbox = document.getElementById(`task-${taskId}`);
+                    const checkbox = document.getElementById(`checkbox-${taskId}`);
                     checkbox.checked = false;
-                    const label = document.querySelector(`label[for="task-${taskId}"]`);
+                    const label = document.querySelector(`label[for="checkbox-${taskId}"]`);
                     label.classList.remove('line-through');
                     loadTaskDetails(taskId);
                 });
@@ -231,7 +231,7 @@ switch ($filter) {
                         .then(response => response.json())
                         .then(result => {
                             if (result.success) {
-                                const taskItem = document.getElementById(`task-${taskId}`).closest('li');
+                                const taskItem = document.getElementById(`task-${taskId}`);
                                 taskItem.remove(); // Hapus elemen task dari DOM
 
                                 Swal.fire(
@@ -259,13 +259,6 @@ switch ($filter) {
                 } else {
                     markTaskUncomplete(taskId);
                 }
-            });
-        });
-
-        document.querySelectorAll('#task-list li').forEach(item => {
-            item.addEventListener('click', () => {
-                const taskId = item.querySelector('.task-checkbox').dataset.taskId;
-                loadTaskDetails(taskId);
             });
         });
     </script>

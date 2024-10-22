@@ -38,12 +38,19 @@ function groupTasksByDueDate($tasks) {
 
 // Fungsi untuk menghitung progress
 function calculateProgress($tasks) {
+    if (empty($tasks)) {
+        return 100; // Return 100% if there are no tasks
+    }
     $total = count($tasks);
     $completed = array_filter($tasks, fn($task) => $task['is_completed']);
     return $total > 0 ? (count($completed) / $total) * 100 : 0;
 }
 
 $groupedTasks = groupTasksByDueDate($tasks);
+$todayProgress = calculateProgress($groupedTasks['today']);
+$tomorrowProgress = calculateProgress($groupedTasks['tomorrow']);
+$thisWeekProgress = calculateProgress($groupedTasks['this_week']);
+$laterProgress = calculateProgress($groupedTasks['later']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -75,16 +82,16 @@ $groupedTasks = groupTasksByDueDate($tasks);
         </div>
 
         <!-- Task Grids -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 h-18">
             <!-- Today's Tasks -->
             <div class="bg-white shadow-lg rounded-lg p-4 task-group">
                 <h2 class="text-xl font-semibold text-gray-700">Today's Tasks</h2>
                 <div class="relative pt-1">
                     <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-green-200">
-                        <div style="width:<?= calculateProgress($groupedTasks['today']) ?>%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500"></div>
+                        <div style="width:<?= $todayProgress ?>%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500"></div>
                     </div>
                     <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-green-600">
-                        <?= round(calculateProgress($groupedTasks['today'])) ?>% Completed
+                        <?= round($todayProgress) ?>% Completed
                     </span>
                 </div>
                 <ul id="sortable-today" class="mt-4 space-y-4">
@@ -105,6 +112,14 @@ $groupedTasks = groupTasksByDueDate($tasks);
             <!-- Tomorrow's Tasks -->
             <div class="bg-white shadow-lg rounded-lg p-4 task-group">
                 <h2 class="text-xl font-semibold text-gray-700">Tomorrow's Tasks</h2>
+                <div class="relative pt-1">
+                    <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-green-200">
+                        <div style="width:<?= $tomorrowProgress ?>%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500"></div>
+                    </div>
+                    <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-green-600">
+                        <?= round($tomorrowProgress) ?>% Completed
+                    </span>
+                </div>
                 <ul id="sortable-tomorrow" class="mt-4 space-y-4">
                     <?php if (!empty($groupedTasks['tomorrow'])): ?>
                         <?php foreach ($groupedTasks['tomorrow'] as $task): ?>
@@ -123,6 +138,14 @@ $groupedTasks = groupTasksByDueDate($tasks);
             <!-- Upcoming Tasks -->
             <div class="bg-white shadow-lg rounded-lg p-4 task-group">
                 <h2 class="text-xl font-semibold text-gray-700">This Week's Tasks</h2>
+                <div class="relative pt-1">
+                    <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-green-200">
+                        <div style="width:<?= $thisWeekProgress ?>%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500"></div>
+                    </div>
+                    <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-green-600">
+                        <?= round($thisWeekProgress) ?>% Completed
+                    </span>
+                </div>
                 <ul id="sortable-upcoming" class="mt-4 space-y-4">
                     <?php if (!empty($groupedTasks['this_week'])): ?>
                         <?php foreach ($groupedTasks['this_week'] as $task): ?>
@@ -142,6 +165,14 @@ $groupedTasks = groupTasksByDueDate($tasks);
         <!-- Later Tasks -->
         <div class="mt-8">
             <h2 class="text-xl font-semibold text-gray-700 mb-4">Later Tasks</h2>
+            <div class="relative pt-1">
+                <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-green-200">
+                    <div style="width:<?= $laterProgress ?>%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500"></div>
+                </div>
+                <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-green-600">
+                    <?= round($laterProgress) ?>% Completed
+                </span>
+            </div>
             <ul id="sortable-later" class="space-y-4">
                 <?php if (!empty($groupedTasks['later'])): ?>
                     <?php foreach ($groupedTasks['later'] as $task): ?>

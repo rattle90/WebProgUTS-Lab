@@ -3,11 +3,12 @@ include 'db.php'; // Koneksi database
 include 'component/navbar.php'; // Memanggil navbar di atas
 
 // Mengambil tanggal hari ini
-$today = new DateTime();
+$today = new DateTime('now', new DateTimeZone('Asia/Jakarta'));
+$todayFormatted = $today->format('Y-m-d'); // Format tanggal untuk perbandingan
 
 // Mengambil tugas yang jatuh tempo dalam 7 hari ke depan
 $query = $pdo->prepare("SELECT * FROM tasks WHERE due_date BETWEEN ? AND DATE_ADD(?, INTERVAL 7 DAY)");
-$query->execute([$today->format('Y-m-d'), $today->format('Y-m-d')]);
+$query->execute([$todayFormatted, $todayFormatted]);
 $tasks = $query->fetchAll(PDO::FETCH_ASSOC);
 
 // Mengorganisir tugas ke dalam array berdasarkan tanggal
@@ -20,14 +21,6 @@ foreach ($tasks as $task) {
     $tasksByDate[$dueDate][] = $task;
 }
 
-// Fungsi untuk memperbarui status tugas di database
-function updateTaskStatus($taskId, $isCompleted) {
-    global $pdo; // Mengakses koneksi PDO dari luar fungsi
-    $query = $pdo->prepare("UPDATE tasks SET is_completed = ? WHERE id = ?");
-    $query->execute([$isCompleted, $taskId]);
-    return $query->rowCount() > 0; // Mengembalikan true jika ada baris yang diperbarui
-}
-
 // Memproses permintaan pembaruan status tugas jika ada
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
@@ -36,12 +29,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($data['id']) && isset($data['is_completed'])) {
         $taskId = $data['id'];
         $isCompleted = $data['is_completed'] ? 1 : 0; // Mengubah nilai boolean ke integer
-        if (updateTaskStatus($taskId, $isCompleted)) {
-            echo json_encode(['success' => true]);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Failed to update task.']);
-        }
-        exit; // Menghentikan eksekusi setelah merespon permintaan
+        $query = $pdo->prepare("UPDATE tasks SET is_completed = ? WHERE id = ?");
+        $query->execute([$isCompleted, $taskId]);
+        echo json_encode(['success' => true]);
+        exit;
     }
 
     // Memproses permintaan penambahan tugas
@@ -107,16 +98,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
 
     <script>
-        function refreshTaskList() {
-            fetch('next7days.php')
-                .then(response => response.text())
-                .then(html => {
-                    const container = document.querySelector('.container');
-                    container.innerHTML = html; // Replace the entire container content
-                })
-                .catch(error => console.error('Error fetching tasks:', error));
-        }
-
         function toggleCompletion(taskId) {
             const checkbox = document.getElementById(`checkbox-${taskId}`);
             const isChecked = checkbox.checked;
@@ -131,7 +112,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    refreshTaskList(); // Refresh the task list
+                    // Update the task display immediately
+                    const taskNameElement = document.querySelector(`#task-${taskId} .task-name`);
+                    if (isChecked) {
+                        taskNameElement.classList.add('completed'); // Add completed class
+                    } else {
+                        taskNameElement.classList.remove('completed'); // Remove completed class
+                    }
                 } else {
                     console.error('Error updating task status:', data.message);
                 }
@@ -208,32 +195,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 echo '<div class="bg-white p-4 rounded-lg shadow-md w-64 flex-none max-h-72 overflow-y-auto">';
                 echo "<h2 class='text-lg font-semibold text-gray-800'>$dayName"; 
-                if ($formattedDate === $today->format('Y-m-d')) {
-                    echo "<span class='today-label'>Today</span>";
+                if ($formattedDate === $todayFormatted) { // Compare with todayFormatted
+                    echo "<span class='today-label'> Today</span>"; // Label Today only for today
                 }
                 echo "</h2>";
                 echo "<p class='text-gray-500'>$formattedDate</p>";
-                echo '<ul class="mt-2 space-y-1" data-date="'.$formattedDate.'">';
+                echo "<ul data-date='$formattedDate'>";
 
-                if (isset($tasksByDate[$formattedDate])) {
+                if (isset($tasksByDate[$formattedDate]) && count($tasksByDate[$formattedDate]) > 0) {
                     foreach ($tasksByDate[$formattedDate] as $task) {
-                        $taskId = $task['id'];
-                        echo '<li id="task-'.$taskId.'" class="flex items-center justify-between">';
-                        echo '<input type="checkbox" id="checkbox-'.$taskId.'" onchange="toggleCompletion('.$taskId.')" class="mr-2" '.($task['is_completed'] ? 'checked' : '').'>';
-                        echo "<span class='task-name'>".htmlspecialchars($task['task_name'])."</span>";
-                        echo '</li>';
+                        $isChecked = $task['is_completed'] ? 'checked' : '';
+                        $completedClass = $task['is_completed'] ? 'completed' : '';
+                        echo "<li id='task-{$task['id']}' class='flex items-center justify-between'>";
+                        echo "<input type='checkbox' id='checkbox-{$task['id']}' onchange='toggleCompletion({$task['id']})' class='mr-2' $isChecked>";
+                        echo "<span class='task-name $completedClass'>{$task['task_name']}</span>";
+                        echo "</li>";
                     }
                 } else {
-                    echo '<li class="text-gray-500">No tasks</li>';
+                    echo "<li class='text-gray-500'>No tasks</li>";
                 }
-
-                // Input field for adding a new task
-                echo '<div class="mt-2">';
-                echo '<input type="text" id="add-task-'.$formattedDate.'" class="p-1 border border-gray-300 rounded" placeholder="+ Add Task" onkeydown="if(event.key === \'Enter\') addTask(\''.$formattedDate.'\')">';
-                echo '</div>';
-
-                echo '</ul>';
-                echo '</div>';
+                echo "</ul>";
+                echo "<input type='text' id='add-task-$formattedDate' placeholder='Add a task...' class='mt-2 p-2 border rounded w-full' onkeypress='if(event.key === \"Enter\"){ addTask(\"$formattedDate\"); }'>";
+                echo "</div>";
             }
             ?>
         </div>
