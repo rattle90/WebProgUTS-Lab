@@ -69,18 +69,20 @@ $groupedTasks = groupTasksByDueDate($tasks);
                     <?php if (!empty($tasks)): ?>
                         <h2 class="text-lg font-semibold text-gray-300 mt-4"><?= ucfirst(str_replace('_', ' ', $group)) ?></h2>
                         <?php foreach ($tasks as $task): ?>
-                            <li class="flex items-center justify-between bg-gray-700 p-3 rounded-md cursor-pointer hover:bg-gray-600"
-                                onclick="loadTaskDetails(<?= $task['id'] ?>)">
+                            <li class="flex items-center justify-between bg-gray-700 p-3 rounded-md cursor-pointer hover:bg-gray-600">
                                 <div class="flex items-center">
-                                    <div class="w-1 h-full bg-green-500 mr-3"></div> <!-- Lis hijau di kiri -->
-                                    <input type="checkbox" id="task-<?= $task['id'] ?>" class="mr-3 task-checkbox"
-                                           data-task-id="<?= $task['id'] ?>" <?= $task['is_completed'] == 1 ? 'checked' : '' ?>>
+                                    <div class="w-1 h-full bg-green-500 mr-3"></div>
+                                    <input type="checkbox" id="task-<?= $task['id'] ?>" class="mr-3 task-checkbox" data-task-id="<?= $task['id'] ?>" <?= $task['is_completed'] == 1 ? 'checked' : '' ?>>
                                     <label for="task-<?= $task['id'] ?>" class="task-label <?= $task['is_completed'] == 1 ? 'line-through' : '' ?>">
                                         <?= htmlspecialchars($task['task_name']) ?>
                                     </label>
                                 </div>
-                                <span class="text-gray-300"><?= (new DateTime($task['due_date']))->format('M d') ?></span> <!-- Tanggal jatuh tempo -->
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-gray-300"><?= (new DateTime($task['due_date']))->format('M d') ?></span> <!-- Tanggal jatuh tempo -->
+                                    <button class="text-red-500 hover:text-red-700" onclick="deleteTask(<?= $task['id'] ?>)">Delete</button> <!-- Tombol Delete -->
+                                </div>
                             </li>
+
                         <?php endforeach; ?>
                     <?php endif; ?>
                 <?php endforeach; ?>
@@ -214,6 +216,25 @@ $groupedTasks = groupTasksByDueDate($tasks);
                 }
             });
         });
+
+        // Fungsi untuk menghapus task via AJAX
+        function deleteTask(taskId) {
+            if (confirm('Are you sure you want to delete this task?')) {
+                fetch(`delete_task.php?task_id=${taskId}`, { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Hapus task dari DOM
+                            const taskElement = document.getElementById(`task-${taskId}`).closest('li');
+                            taskElement.remove();
+                        } else {
+                            alert('Failed to delete task.');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        }
+
     </script>
 </body>
 </html>
