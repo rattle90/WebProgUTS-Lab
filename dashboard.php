@@ -170,49 +170,26 @@ $groupedTasks = groupTasksByDueDate($tasks);
     </div>
 
     <script>
-        // Toggle Dark Mode
-        const toggleDarkMode = document.getElementById('toggleDarkMode');
-        toggleDarkMode.addEventListener('click', () => {
-            document.body.classList.toggle('dark-mode');
-        });
-
-        // Implementing Drag and Drop functionality
-        const taskGroups = document.querySelectorAll('.task-group');
-
-        taskGroups.forEach(group => {
-            group.addEventListener('dragover', (event) => {
-                event.preventDefault();
-            });
-
-            group.addEventListener('drop', (event) => {
-                const taskId = event.dataTransfer.getData('text/plain');
-                const taskElement = document.querySelector(`.task[data-id="${taskId}"]`);
-                group.appendChild(taskElement);
-            });
-        });
-
-        const tasks = document.querySelectorAll('.task');
-        tasks.forEach(task => {
-            task.addEventListener('dragstart', (event) => {
-                event.dataTransfer.setData('text/plain', task.dataset.id);
-            });
-        });
-
-        // Checkbox change event
-        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-        checkboxes.forEach(checkbox => {
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
             checkbox.addEventListener('change', function () {
-                const taskId = this.parentElement.dataset.id;
-                const isChecked = this.checked ? 1 : 0;
-                
+                const taskId = this.closest('.task').dataset.id;
+                const isCompleted = this.checked ? 1 : 0;
+
                 fetch('mark_complete.php', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/x-www-form-urlencoded',
                     },
-                    body: JSON.stringify({ id: taskId, is_completed: isChecked })
-                });
+                    body: 'id=' + taskId + '&is_completed=' + isCompleted
+                })
+                .then(response => response.text())
+                .then(data => console.log(data))
+                .catch(error => console.error('Error:', error));
             });
+        });
+
+        document.getElementById('toggleDarkMode').addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
         });
     </script>
 </body>
