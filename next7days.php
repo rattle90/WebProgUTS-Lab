@@ -1,14 +1,22 @@
 <?php
+session_start(); // Memulai session
 include 'db.php'; // Koneksi database
 include 'component/navbar.php'; // Memanggil navbar di atas
+
+// Cek apakah pengguna sudah login
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php"); // Arahkan ke halaman login jika belum login
+    exit;
+}
 
 // Mengambil tanggal hari ini
 $today = new DateTime('now', new DateTimeZone('Asia/Jakarta'));
 $todayFormatted = $today->format('Y-m-d'); // Format tanggal untuk perbandingan
 
 // Mengambil tugas yang jatuh tempo dalam 7 hari ke depan
-$query = $pdo->prepare("SELECT * FROM tasks WHERE due_date BETWEEN ? AND DATE_ADD(?, INTERVAL 7 DAY)");
-$query->execute([$todayFormatted, $todayFormatted]);
+$userId = $_SESSION['user_id']; // Ambil user_id dari session
+$query = $pdo->prepare("SELECT * FROM tasks WHERE user_id = ? AND due_date BETWEEN ? AND DATE_ADD(?, INTERVAL 7 DAY)");
+$query->execute([$userId, $todayFormatted, $todayFormatted]);
 $tasks = $query->fetchAll(PDO::FETCH_ASSOC);
 
 // Mengorganisir tugas ke dalam array berdasarkan tanggal
@@ -41,8 +49,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $dueDate = $data['due_date'];
 
         // Menyimpan tugas ke database
-        $addQuery = $pdo->prepare("INSERT INTO tasks (task_name, due_date, is_completed) VALUES (?, ?, 0)");
-        if ($addQuery->execute([$taskName, $dueDate])) {
+        $addQuery = $pdo->prepare("INSERT INTO tasks (task_name, due_date, is_completed, user_id) VALUES (?, ?, 0, ?)");
+        if ($addQuery->execute([$taskName, $dueDate, $userId])) { // Menyertakan user_id
             echo json_encode(['success' => true, 'id' => $pdo->lastInsertId(), 'task_name' => $taskName]); // Mengembalikan ID tugas yang baru ditambahkan
         } else {
             echo json_encode(['success' => false]);

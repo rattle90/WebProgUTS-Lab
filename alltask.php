@@ -1,9 +1,18 @@
 <?php
+session_start();
 include 'db.php'; // Koneksi database
 include 'component/navbar.php';
 
-// Ambil semua task dari database
-$query = $pdo->query("SELECT * FROM tasks");
+// Cek apakah pengguna sudah login
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php"); // Arahkan ke halaman login jika belum login
+    exit;
+}
+
+// Ambil semua task dari database untuk pengguna yang sedang login
+$userId = $_SESSION['user_id'];
+$query = $pdo->prepare("SELECT * FROM tasks WHERE user_id = ?");
+$query->execute([$userId]);
 $tasks = $query->fetchAll(PDO::FETCH_ASSOC);
 
 // Fungsi untuk mengelompokkan tugas berdasarkan tanggal jatuh tempo

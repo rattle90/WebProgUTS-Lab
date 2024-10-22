@@ -1,6 +1,14 @@
 <?php
+session_start(); // Mulai session
 include 'db.php';
 include 'component/navbar.php';
+
+// Pastikan pengguna telah login dan ID pengguna ada di session
+if (!isset($_SESSION['user_id'])) {
+    die("You need to log in to access this page."); // Pesan jika belum login
+}
+
+$userId = $_SESSION['user_id']; // Ambil ID pengguna dari session
 
 // Set timezone
 date_default_timezone_set('Asia/Jakarta');
@@ -22,9 +30,9 @@ if ($selected_month) {
     }
 }
 
-// Fetch tasks for the selected range from the database
-$query = $pdo->prepare("SELECT * FROM tasks WHERE due_date BETWEEN :start_date AND :end_date ORDER BY due_date ASC");
-$query->execute(['start_date' => $start_date, 'end_date' => $end_date]);
+// Fetch tasks for the selected range from the database for the logged-in user
+$query = $pdo->prepare("SELECT * FROM tasks WHERE user_id = :user_id AND due_date BETWEEN :start_date AND :end_date ORDER BY due_date ASC");
+$query->execute(['user_id' => $userId, 'start_date' => $start_date, 'end_date' => $end_date]);
 $tasks = $query->fetchAll(PDO::FETCH_ASSOC);
 
 // Group tasks by date
@@ -48,7 +56,6 @@ for ($i = 0; $i <= 6; $i++) { // Show current month and 6 months ahead
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -59,20 +66,16 @@ for ($i = 0; $i <= 6; $i++) { // Show current month and 6 months ahead
         body {
             font-family: 'Poppins', sans-serif;
         }
-
         .scroll-to {
             cursor: pointer;
             transition: background-color 0.3s;
         }
-
         .scroll-to:hover {
             background-color: rgba(0, 0, 0, 0.05);
         }
-
         .main-content {
             padding-top: 110px;
         }
-
         .disabled {
             opacity: 0.5;
             cursor: not-allowed;
@@ -202,6 +205,8 @@ for ($i = 0; $i <= 6; $i++) { // Show current month and 6 months ahead
         document.getElementById('add-task-form').addEventListener('submit', function (e) {
             e.preventDefault();
             const formData = new FormData(e.target);
+            formData.append('user_id', '<?= $userId ?>'); // Tambahkan ID pengguna ke form data
+
             fetch('add_task.php', {
                 method: 'POST',
                 body: formData

@@ -1,9 +1,19 @@
 <?php
+session_start(); // Memulai sesi untuk mengakses user_id
 include 'db.php'; // Koneksi database
 include 'component/navbar.php';
 
-// Ambil semua task dari database
-$query = $pdo->query("SELECT * FROM tasks");
+// Pastikan user sudah login
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php'); // Redirect ke halaman login jika belum login
+    exit();
+}
+
+$user_id = $_SESSION['user_id']; // Ambil user_id dari sesi
+
+// Ambil semua task dari database berdasarkan user_id
+$query = $pdo->prepare("SELECT * FROM tasks WHERE user_id = ?");
+$query->execute([$user_id]);
 $tasks = $query->fetchAll(PDO::FETCH_ASSOC);
 
 // Fungsi untuk mengelompokkan tugas berdasarkan tanggal jatuh tempo
@@ -70,7 +80,8 @@ $laterProgress = calculateProgress($groupedTasks['later']);
 <body class="bg-gray-100 pt-28">
 
     <div class="container mx-auto px-4">
-        <h1 class="text-3xl font-semibold text-gray-800 mb-6">My Task Overview</h1>
+        <h1 class="text-3xl font-semibold text-gray-800 mb-2">Halo, <?= htmlspecialchars($_SESSION['username']) ?>!</h1>
+        <p class="text-gray-600 text-left mb-4">“Tetapi kamu ini, kuatkanlah hatimu, jangan lemah semangatmu, karena ada upah bagi usahamu!”</p>
 
         <!-- Filter -->
         <div class="flex justify-between mb-6">
@@ -163,7 +174,7 @@ $laterProgress = calculateProgress($groupedTasks['later']);
         </div>
 
         <!-- Later Tasks -->
-        <div class="mt-8">
+        <div class="bg-white shadow-lg rounded-lg p-4 task-group mt-8">
             <h2 class="text-xl font-semibold text-gray-700 mb-4">Later Tasks</h2>
             <div class="relative pt-1">
                 <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-green-200">
@@ -187,7 +198,7 @@ $laterProgress = calculateProgress($groupedTasks['later']);
                 <?php endif; ?>
             </ul>
         </div>
-    </div>
+
 
     <script>
         document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {

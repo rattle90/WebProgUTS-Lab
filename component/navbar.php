@@ -50,8 +50,8 @@
                 <img src="profile.jpg" alt="Profile" class="h-8 w-8 rounded-full border-2 border-gray-800 cursor-pointer" />
             </button>
             <div class="dropdown-content absolute right-0 mt-2 hidden bg-gray-800 rounded-md shadow-lg w-48">
-                <a href="#" class="block text-lg px-6 py-2 text-gray-300 hover:bg-gray-700 rounded-md">Your Profile</a>
-                <a href="#" class="block text-lg px-6 py-2 text-gray-300 hover:bg-gray-700 rounded-md">Sign Out</a>
+                <a href="./profile.php" class="block text-lg px-6 py-2 text-gray-300 hover:bg-gray-700 rounded-md">Your Profile</a>
+                <a href="./logout.php" class="block text-lg px-6 py-2 text-gray-300 hover:bg-gray-700 rounded-md">Sign Out</a>
             </div>
         </div>
     </div>
