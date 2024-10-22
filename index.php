@@ -176,6 +176,10 @@ $groupedTasks = groupTasksByDueDate($tasks);
         document.getElementById('add-task-form').addEventListener('submit', (e) => {
             e.preventDefault(); // Mencegah reload
             const formData = new FormData(e.target);
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            
+            // Disable tombol submit untuk mencegah pengiriman berulang
+            submitButton.disabled = true;
 
             fetch('add_task.php', {
                 method: 'POST',
@@ -184,8 +188,18 @@ $groupedTasks = groupTasksByDueDate($tasks);
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    location.reload(); // Reload halaman untuk melihat task baru
+                    // Reload halaman untuk melihat task baru
+                    location.reload();
+                } else {
+                    // Handle error jika task gagal ditambahkan (opsional)
+                    alert('Error adding task.');
                 }
+            })
+            .finally(() => {
+                // Aktifkan kembali tombol submit setelah permintaan selesai
+                submitButton.disabled = false;
+                // Tutup modal setelah task berhasil ditambahkan
+                document.getElementById('add-task-modal').classList.add('hidden');
             });
         });
 

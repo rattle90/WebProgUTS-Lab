@@ -39,10 +39,10 @@ for ($i = -6; $i <= 6; $i++) { // Show 6 months before and after the current mon
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Dashboard - Upcoming</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Poppins', sans-serif; /* Changed to Poppins */
         }
         .scroll-to {
             cursor: pointer;
@@ -76,13 +76,13 @@ for ($i = -6; $i <= 6; $i++) { // Show 6 months before and after the current mon
         <!-- Taskbar with days of the selected month -->
         <div class="flex space-x-4 overflow-x-auto pb-4">
             <?php
-            $current_day = strtotime(date('Y-m-d')); // Hari ini
-            $end_day = strtotime('+6 days', $current_day); // 6 hari ke depan
+            $current_day = strtotime(date('Y-m-d')); // Today
+            $end_day = strtotime('+6 days', $current_day); // 6 days ahead
 
-            // Menampilkan tanggal dari hari ini hingga 6 hari ke depan
+            // Display dates from today to 6 days ahead
             while ($current_day <= $end_day) {
-                $formatted_day = date('D j', $current_day); // Format tampilan: Mon 21
-                $id_day = date('Y-m-d', $current_day); // Digunakan untuk ID scroll
+                $formatted_day = date('D j', $current_day); // Format display: Mon 21
+                $id_day = date('Y-m-d', $current_day); // Used for scroll ID
 
                 echo '<div class="scroll-to p-2" data-target="#task-'.$id_day.'">';
                 echo '<div class="text-center text-sm font-bold">'.date('D', $current_day).'</div>';
@@ -103,7 +103,7 @@ for ($i = -6; $i <= 6; $i++) { // Show 6 months before and after the current mon
                 $formatted_date = date('l, j M', strtotime($date)); // 'l' is for full day name
                 ?>
                 <h2 class="text-base font-black">
-                    <?= htmlspecialchars($formatted_date) ?> <!-- Tampilkan hari, tanggal, dan bulan singkatan -->
+                    <?= htmlspecialchars($formatted_date) ?> <!-- Display day, date, and month abbreviation -->
                 </h2>
                 <hr class="border-t border-gray-300 w-full my-2">
                 <ul class="space-y-4">
@@ -135,7 +135,7 @@ for ($i = -6; $i <= 6; $i++) { // Show 6 months before and after the current mon
             <form id="add-task-form">
                 <div class="mb-4">
                     <input type="text" name="task_name" placeholder="Task name" class="p-2 text-lg font-semibold border-b w-full focus:outline-none mb-2" required>
-                    <input type="date" name="due_date" class="p-2 text-lg font-semibold border-b w-full focus:outline-none mb-2" required>
+                    <input type="hidden" name="due_date" id="due-date-input">
                 </div>
                 <div class="flex space-x-2">
                     <button type="button" class="bg-gray-100 text-gray-600 px-4 py-2 rounded-md" id="cancel-task-btn">Cancel</button>
@@ -159,6 +159,8 @@ for ($i = -6; $i <= 6; $i++) { // Show 6 months before and after the current mon
         // Modal control for adding tasks
         document.querySelectorAll('[id^="add-task-btn-"]').forEach(button => {
             button.addEventListener('click', function () {
+                const dateId = this.id.split('-')[2]; // Get the date from the button ID
+                document.getElementById('due-date-input').value = dateId; // Set the due date input value
                 document.getElementById('add-task-modal').classList.remove('hidden');
             });
         });
@@ -180,8 +182,30 @@ for ($i = -6; $i <= 6; $i++) { // Show 6 months before and after the current mon
             fetch('add_task.php', {
                 method: 'POST',
                 body: formData
-            }).then(() => {
-                window.location.reload();
+            }).then(response => response.json()).then(data => {
+                if (data.success) {
+                    window.location.reload();
+                }
+            });
+        });
+
+        // Update task completion status
+        document.querySelectorAll('.task-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function () {
+                const taskId = this.getAttribute('data-task-id');
+                const isCompleted = this.checked ? 1 : 0;
+
+                fetch('update_task.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id: taskId, is_completed: isCompleted })
+                }).then(response => response.json()).then(data => {
+                    if (!data.success) {
+                        alert('Error updating task status');
+                    }
+                });
             });
         });
     </script>
