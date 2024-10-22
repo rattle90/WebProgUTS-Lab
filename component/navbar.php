@@ -43,7 +43,6 @@
             <a href="./index.php" class="nav-link text-gray-400 font-medium text-lg flex items-center">All Task</a> 
             <a href="./next7days.php" class="nav-link text-gray-400 font-medium text-lg flex items-center">Next 7 Days</a>
             <a href="./upcoming.php" class="nav-link text-gray-400 font-medium text-lg flex items-center">Upcoming</a>
-            <a href="about_us.php" class="nav-link text-gray-400 font-medium text-lg flex items-center">About Us</a>
         </div>
 
         <div class="relative dropdown">
