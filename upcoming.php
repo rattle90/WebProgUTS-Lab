@@ -44,7 +44,6 @@ for ($i = -6; $i <= 6; $i++) { // Show 6 months before and after the current mon
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            /* Changed to Poppins */
         }
 
         .scroll-to {
@@ -55,20 +54,26 @@ for ($i = -6; $i <= 6; $i++) { // Show 6 months before and after the current mon
         .scroll-to:hover {
             background-color: rgba(0, 0, 0, 0.05);
         }
+
+        /* Tambahkan CSS untuk memastikan konten tidak tertutup navbar */
+        .main-content {
+            padding-top: 110px; /* Sesuaikan nilai ini dengan tinggi navbar */
+        }
     </style>
 </head>
 
 <body class="bg-white h-screen">
 
-    <div class="max-w-4xl mx-auto py-10">
+    <?php include 'component/navbar.php'; ?>
+
+    <div class="main-content max-w-4xl mx-auto py-10">
         <div class="mb-6 flex justify-between items-center">
             <h1 class="text-2xl font-black">Upcoming Tasks</h1>
 
             <!-- Dropdown to select month -->
             <form action="" method="GET">
                 <label for="month" class="text-lg font-bold">Select Month: </label>
-                <select name="month" id="month" class="p-2 border border-gray-300 rounded-md"
-                    onchange="this.form.submit()">
+                <select name="month" id="month" class="p-2 border border-gray-300 rounded-md" onchange="this.form.submit()">
                     <?php foreach ($months as $month): ?>
                         <option value="<?= $month ?>" <?= $selected_month == $month ? 'selected' : '' ?>>
                             <?= date('F Y', strtotime($month)) ?>
@@ -79,7 +84,7 @@ for ($i = -6; $i <= 6; $i++) { // Show 6 months before and after the current mon
         </div>
 
         <!-- Taskbar with days of the selected month -->
-        <div class="flex space-x-4 overflow-x-auto pb-4">
+        <div class="flex justify-center space-x-4 overflow-x-auto pb-4">
             <?php
             $current_day = strtotime(date('Y-m-d')); // Today
             $end_day = strtotime('+6 days', $current_day); // 6 days ahead
@@ -88,8 +93,8 @@ for ($i = -6; $i <= 6; $i++) { // Show 6 months before and after the current mon
             while ($current_day <= $end_day) {
                 $formatted_day = date('D j', $current_day); // Format display: Mon 21
                 $id_day = date('Y-m-d', $current_day); // Used for scroll ID
-            
-                echo '<div class="scroll-to p-2" data-target="#task-' . $id_day . '">';
+                
+                echo '<div class="flex-1 text-center scroll-to" data-target="#task-' . $id_day . '-group">';
                 echo '<div class="text-center text-sm font-bold">' . date('D', $current_day) . '</div>';
                 echo '<div class="text-center text-lg font-bold">' . date('j', $current_day) . '</div>';
                 echo '</div>';
@@ -99,6 +104,7 @@ for ($i = -6; $i <= 6; $i++) { // Show 6 months before and after the current mon
             }
             ?>
         </div>
+
 
         <?php foreach ($grouped_tasks as $date => $tasks_for_date): ?>
             <div class="mt-8" id="task-<?= htmlspecialchars($date) ?>-group">
@@ -114,15 +120,13 @@ for ($i = -6; $i <= 6; $i++) { // Show 6 months before and after the current mon
                     <?php foreach ($tasks_for_date as $task): ?>
                         <li class="flex items-center justify-between bg-white p-4 rounded-lg shadow-md">
                             <div>
-                                <input type="checkbox" id="task-<?= $task['id'] ?>" class="mr-3 task-checkbox"
-                                    data-task-id="<?= $task['id'] ?>" <?= $task['is_completed'] ? 'checked' : '' ?>>
-                                <label for="task-<?= $task['id'] ?>"
-                                    class="text-gray-700"><?= htmlspecialchars($task['task_name']) ?></label>
+                                <input type="checkbox" id="task-<?= $task['id'] ?>" class="mr-3 task-checkbox" data-task-id="<?= $task['id'] ?>" <?= $task['is_completed'] ? 'checked' : '' ?>>
+                                <label for="task-<?= $task['id'] ?>" class="text-gray-700"><?= htmlspecialchars($task['task_name']) ?></label>
                             </div>
                         </li>
                     <?php endforeach; ?>
                 </ul>
-                <button class="flex items-center text-gray-500 hover:text-gray-700 mt-4" id="add-task-btn-2024-10-20">
+                <button class="flex items-center text-gray-500 hover:text-gray-700 mt-4" id="add-task-btn-<?= htmlspecialchars($date) ?>">
                     <span class="text-red-500 text-xl mr-2">+</span>
                     <span>Add task</span>
                 </button>
@@ -147,7 +151,7 @@ for ($i = -6; $i <= 6; $i++) { // Show 6 months before and after the current mon
                     <textarea id="notes" placeholder="Notes" name="notes" class="p-2 border rounded-md w-full"></textarea>
 
                     <input type="hidden" id="due-date-input" class="p-2 bg-transparent border-none opacity-0 pointer-events-none" name="due_date" readonly>
-                    </div>
+                </div>
                 <div class="flex space-x-2">
                     <button type="button" class="bg-gray-100 text-gray-600 px-4 py-2 rounded-md"
                         id="cancel-task-btn">Cancel</button>
@@ -159,14 +163,20 @@ for ($i = -6; $i <= 6; $i++) { // Show 6 months before and after the current mon
 
     <script>
         // Scroll to task section when date is clicked in the taskbar
-        document.querySelectorAll('.scroll-to').forEach(item => {
-            item.addEventListener('click', function () {
-                const target = document.querySelector(this.getAttribute('data-target'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth' });
-                }
+            document.querySelectorAll('.scroll-to').forEach(item => {
+                item.addEventListener('click', function () {
+                    const target = document.querySelector(this.getAttribute('data-target'));
+                    if (target) {
+                        const offset = 110; // Nilai offset sesuai padding-top yang Anda atur
+                        const elementPosition = target.getBoundingClientRect().top + window.scrollY; // Mendapatkan posisi elemen relatif terhadap viewport
+                        window.scrollTo({
+                            top: elementPosition - offset, // Mengurangi offset dari posisi elemen
+                            behavior: 'smooth' // Animasi scroll
+                        });
+                    }
+                });
             });
-        });
+
 
         document.querySelectorAll('[id^="add-task-btn-"]').forEach(button => {
             button.addEventListener('click', function () {
@@ -193,33 +203,16 @@ for ($i = -6; $i <= 6; $i++) { // Show 6 months before and after the current mon
             fetch('add_task.php', {
                 method: 'POST',
                 body: formData
-            }).then(response => response.json()).then(data => {
-                if (data.success) {
-                    window.location.reload();
-                }
-            });
-        });
-
-        // Update task completion status
-        document.querySelectorAll('.task-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', function () {
-                const taskId = this.getAttribute('data-task-id');
-                const isCompleted = this.checked ? 1 : 0;
-
-                fetch('update_task.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ id: taskId, is_completed: isCompleted })
-                }).then(response => response.json()).then(data => {
-                    if (!data.success) {
-                        alert('Error updating task status');
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload(); // Reload the page to see new task
+                    } else {
+                        alert('Error adding task: ' + data.message);
                     }
                 });
-            });
         });
     </script>
 </body>
-
 </html>
