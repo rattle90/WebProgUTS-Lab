@@ -33,14 +33,14 @@
 
     <div class="flex items-center justify-between">
         <div class="flex items-center">
-            <a href="dashboard.php">
+            <a href="">
                 <img src="logo.png" alt="Logo" class="h-8 w-8" />
             </a>
         </div>
 
         <div class="flex-grow flex justify-center space-x-2">
-             <a href="./dashboard.php" class="nav-link text-gray-400 font-medium text-lg flex items-center">My Dashboard</a> 
-            <a href="./index.php" class="nav-link text-gray-400 font-medium text-lg flex items-center">All Task</a> 
+            <a href="./index.php" class="nav-link text-gray-400 font-medium text-lg flex items-center">My Dashboard</a> 
+            <a href="./all_task.php" class="nav-link text-gray-400 font-medium text-lg flex items-center">All Task</a> 
             <a href="./next7days.php" class="nav-link text-gray-400 font-medium text-lg flex items-center">Next 7 Days</a>
             <a href="./upcoming.php" class="nav-link text-gray-400 font-medium text-lg flex items-center">Upcoming</a>
         </div>
@@ -70,10 +70,11 @@
         }
     });
 
-    const currentLocation = window.location.href;
+    const currentLocation = window.location.href; // Ambil URL lengkap
     const navLinks = document.querySelectorAll('.nav-link');
 
     navLinks.forEach(link => {
+        // Cek apakah href dari link sama dengan currentLocation
         if (link.href === currentLocation) {
             link.classList.add('active');
             link.classList.remove('text-gray-400');

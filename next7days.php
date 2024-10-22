@@ -31,6 +31,8 @@ function updateTaskStatus($taskId, $isCompleted) {
 // Memproses permintaan pembaruan status tugas jika ada
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
+    
+    // Memproses permintaan pembaruan status tugas
     if (isset($data['id']) && isset($data['is_completed'])) {
         $taskId = $data['id'];
         $isCompleted = $data['is_completed'] ? 1 : 0; // Mengubah nilai boolean ke integer
@@ -40,6 +42,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode(['success' => false, 'message' => 'Failed to update task.']);
         }
         exit; // Menghentikan eksekusi setelah merespon permintaan
+    }
+
+    // Memproses permintaan penambahan tugas
+    if (isset($data['task_name']) && isset($data['due_date'])) {
+        $taskName = $data['task_name'];
+        $dueDate = $data['due_date'];
+
+        // Menyimpan tugas ke database
+        $addQuery = $pdo->prepare("INSERT INTO tasks (task_name, due_date, is_completed) VALUES (?, ?, 0)");
+        if ($addQuery->execute([$taskName, $dueDate])) {
+            echo json_encode(['success' => true, 'id' => $pdo->lastInsertId(), 'task_name' => $taskName]); // Mengembalikan ID tugas yang baru ditambahkan
+        } else {
+            echo json_encode(['success' => false]);
+        }
+        exit;
     }
 }
 ?>
@@ -62,55 +79,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             text-decoration: line-through;
             color: gray; /* Warna untuk tugas yang selesai */
         }
-        /* Modal Styles */
-        .modal {
-            display: none; /* Modal tersembunyi secara default */
-            position: fixed;
-            z-index: 50;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgb(0,0,0);
-            background-color: rgba(0,0,0,0.4); /* Background semi-transparan */
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%; /* Lebar modal */
-        }
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
+        .today-label {
+            color: #FF6347; /* Warna untuk label 'Today' */
+            opacity: 0.7; /* Mengurangi opacity */
             font-weight: bold;
+            margin-left: 10px; /* Spasi antara nama hari dan label 'Today' */
         }
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
+        
+        /* Custom scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px; /* Width of the scrollbar */
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; /* Background of the scrollbar track */
+            border-radius: 10px; /* Rounded corners for the track */
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #FF6347; /* Color of the scrollbar thumb */
+            border-radius: 10px; /* Rounded corners for the thumb */
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #FF4500; /* Darker color when hovering over the thumb */
         }
     </style>
+
     <script>
-        let currentTaskId = null; // Menyimpan ID tugas saat ini
+        function refreshTaskList() {
+            fetch('next7days.php')
+                .then(response => response.text())
+                .then(html => {
+                    const container = document.querySelector('.container');
+                    container.innerHTML = html; // Replace the entire container content
+                })
+                .catch(error => console.error('Error fetching tasks:', error));
+        }
 
         function toggleCompletion(taskId) {
-            const taskElement = document.getElementById(`task-${taskId}`);
             const checkbox = document.getElementById(`checkbox-${taskId}`);
             const isChecked = checkbox.checked;
 
-            // Mengubah status tugas di tampilan
-            if (isChecked) {
-                taskElement.classList.add('completed'); // Menandai tugas sebagai selesai
-            } else {
-                taskElement.classList.remove('completed'); // Menghapus tanda selesai
-            }
-
-            // Mengupdate status tugas di database
             fetch('next7days.php', {
                 method: 'POST',
                 headers: {
@@ -120,91 +130,112 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             })
             .then(response => response.json())
             .then(data => {
-                if (!data.success) {
+                if (data.success) {
+                    refreshTaskList(); // Refresh the task list
+                } else {
                     console.error('Error updating task status:', data.message);
                 }
             })
             .catch(error => console.error('Error:', error));
         }
 
-        function showDetails(taskId) {
-            currentTaskId = taskId; // Menyimpan ID tugas yang diklik
-            const checkbox = document.getElementById(`checkbox-${taskId}`);
-            const modalContent = document.getElementById('modal-content');
+        function addTask(dueDate) {
+            const inputField = document.getElementById(`add-task-${dueDate}`);
+            const taskName = inputField.value.trim();
 
-            // Memeriksa status tugas
-            if (checkbox.checked) {
-                modalContent.innerText = "Task is completed.";
+            if (taskName) {
+                inputField.disabled = true;
+
+                fetch('next7days.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ task_name: taskName, due_date: dueDate }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Menyisipkan task baru langsung ke DOM
+                        const taskList = document.querySelector(`ul[data-date="${dueDate}"]`);
+                        
+                        const newTask = document.createElement('li');
+                        newTask.id = `task-${data.id}`;
+                        newTask.className = "flex items-center justify-between";
+
+                        newTask.innerHTML = `
+                            <input type="checkbox" id="checkbox-${data.id}" onchange="toggleCompletion(${data.id})" class="mr-2">
+                            <span class="task-name">${taskName}</span>
+                        `;
+
+                        // Menambahkan task ke daftar (di atas "No tasks" jika ada)
+                        const noTasksMessage = taskList.querySelector('.text-gray-500');
+                        if (noTasksMessage) {
+                            noTasksMessage.remove(); // Menghapus pesan "No tasks"
+                        }
+
+                        taskList.appendChild(newTask); // Tambahkan task baru ke daftar
+                    } else {
+                        console.error('Error adding task:', data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error))
+                .finally(() => {
+                    inputField.value = '';
+                    inputField.disabled = false;
+                    inputField.focus();
+                });
             } else {
-                modalContent.innerText = "Task is not completed.";
-            }
-
-            // Menampilkan modal
-            const modal = document.getElementById('myModal');
-            modal.style.display = "block";
-        }
-
-        // Menutup modal
-        function closeModal() {
-            const modal = document.getElementById('myModal');
-            modal.style.display = "none";
-        }
-
-        // Menutup modal saat pengguna mengklik di luar modal
-        window.onclick = function(event) {
-            const modal = document.getElementById('myModal');
-            if (event.target === modal) {
-                closeModal();
+                inputField.focus();
             }
         }
     </script>
-</head>
-<body class="bg-blue-600 h-screen p-5 pt-24"> <!-- Tambahkan padding top -->
 
-    <div class="container mx-auto mt-5 h-96"> <!-- Menambahkan kelas h-full untuk kontainer -->
+</head>
+<body class="bg-blue-600 h-screen p-5 pt-24">
+
+    <div class="container mx-auto mt-5">
         <h1 class="text-white text-3xl font-bold mb-6">Tasks for the Next 7 Days</h1>
-        <div class="flex space-x-4 overflow-x-auto h-full"> <!-- Scrollbar tetap ada dan tinggi penuh -->
+        <div class="flex space-x-4 overflow-x-auto">
             <?php
             // Menampilkan tugas untuk hari ini hingga tujuh hari ke depan
             for ($i = 0; $i < 7; $i++) {
-                $date = clone $today; // Clone objek tanggal
-                $date->modify("+$i day"); // Menambah hari
+                $date = clone $today;
+                $date->modify("+$i day");
 
-                // Mengatur format tanggal untuk tampilan
-                $dayName = $date->format('l'); // Nama hari
-                $formattedDate = $date->format('Y-m-d'); // Format tanggal
+                $dayName = $date->format('l');
+                $formattedDate = $date->format('Y-m-d');
 
-                // Menampilkan card dengan tinggi maksimum
-                echo '<div class="bg-white p-4 rounded-lg shadow-md w-64 flex-none max-h-72 h-64 overflow-hidden">'; // Kartu dengan tinggi maksimum dan overflow
-                echo "<h2 class='text-lg font-semibold text-gray-800'>$dayName</h2>";
+                echo '<div class="bg-white p-4 rounded-lg shadow-md w-64 flex-none max-h-72 overflow-y-auto">';
+                echo "<h2 class='text-lg font-semibold text-gray-800'>$dayName"; 
+                if ($formattedDate === $today->format('Y-m-d')) {
+                    echo "<span class='today-label'>Today</span>";
+                }
+                echo "</h2>";
                 echo "<p class='text-gray-500'>$formattedDate</p>";
-                echo '<ul class="mt-2 space-y-1 h-full overflow-y-auto">'; // Mengatur agar daftar tugas memanjang dan scrollable
+                echo '<ul class="mt-2 space-y-1" data-date="'.$formattedDate.'">';
 
-                // Menampilkan tugas untuk tanggal ini
                 if (isset($tasksByDate[$formattedDate])) {
                     foreach ($tasksByDate[$formattedDate] as $task) {
-                        $taskId = $task['id']; // Asumsikan 'id' adalah kolom ID tugas
-                        echo '<li id="task-'.$taskId.'" class="flex items-center justify-between">'; // Kartu tugas tanpa efek hover
-                        echo '<input type="checkbox" id="checkbox-'.$taskId.'" onchange="toggleCompletion('.$taskId.')" class="mr-2" '.($task['is_completed'] ? 'checked' : '').'>'; // Checkbox untuk tugas
-                        echo "<span class='task-name' onclick='showDetails($taskId)' style='cursor:pointer;'>".htmlspecialchars($task['task_name'])."</span>";
+                        $taskId = $task['id'];
+                        echo '<li id="task-'.$taskId.'" class="flex items-center justify-between">';
+                        echo '<input type="checkbox" id="checkbox-'.$taskId.'" onchange="toggleCompletion('.$taskId.')" class="mr-2" '.($task['is_completed'] ? 'checked' : '').'>';
+                        echo "<span class='task-name'>".htmlspecialchars($task['task_name'])."</span>";
                         echo '</li>';
                     }
                 } else {
                     echo '<li class="text-gray-500">No tasks</li>';
                 }
 
+                // Input field for adding a new task
+                echo '<div class="mt-2">';
+                echo '<input type="text" id="add-task-'.$formattedDate.'" class="p-1 border border-gray-300 rounded" placeholder="+ Add Task" onkeydown="if(event.key === \'Enter\') addTask(\''.$formattedDate.'\')">';
+                echo '</div>';
+
                 echo '</ul>';
                 echo '</div>';
             }
             ?>
-        </div>
-    </div>
-
-    <!-- Modal -->
-    <div id="myModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <p id="modal-content"></p> <!-- Tempat untuk menampilkan status tugas -->
         </div>
     </div>
 </body>

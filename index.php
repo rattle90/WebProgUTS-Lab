@@ -12,15 +12,12 @@ function groupTasksByDueDate($tasks) {
         'today' => [],
         'tomorrow' => [],
         'this_week' => [],
-        'next_week' => [],
         'later' => [],
     ];
 
-    $today = new DateTime();
+    $today = new DateTime('now', new DateTimeZone('Asia/Jakarta')); // Mengatur timezone sesuai
     $tomorrow = (clone $today)->modify('+1 day');
     $endOfWeek = (clone $today)->modify('Sunday this week');
-    $startOfNextWeek = (clone $endOfWeek)->modify('+1 day');
-    $endOfNextWeek = (clone $startOfNextWeek)->modify('Sunday this week');
 
     foreach ($tasks as $task) {
         $dueDate = new DateTime($task['due_date']);
@@ -29,9 +26,7 @@ function groupTasksByDueDate($tasks) {
             $groupedTasks['today'][] = $task;
         } elseif ($dueDate->format('Y-m-d') === $tomorrow->format('Y-m-d')) {
             $groupedTasks['tomorrow'][] = $task;
-        } elseif ($dueDate >= $startOfNextWeek && $dueDate <= $endOfNextWeek) {
-            $groupedTasks['next_week'][] = $task;
-        } elseif ($dueDate >= $endOfWeek && $dueDate <= $startOfNextWeek) {
+        } elseif ($dueDate > $today && $dueDate <= $endOfWeek) {
             $groupedTasks['this_week'][] = $task;
         } else {
             $groupedTasks['later'][] = $task;
@@ -41,9 +36,15 @@ function groupTasksByDueDate($tasks) {
     return $groupedTasks;
 }
 
+// Fungsi untuk menghitung progress
+function calculateProgress($tasks) {
+    $total = count($tasks);
+    $completed = array_filter($tasks, fn($task) => $task['is_completed']);
+    return $total > 0 ? (count($completed) / $total) * 100 : 0;
+}
+
 $groupedTasks = groupTasksByDueDate($tasks);
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -51,197 +52,144 @@ $groupedTasks = groupTasksByDueDate($tasks);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Poppins', sans-serif; }
+        .dark-mode { background-color: #1a202c; color: white; }
+        .task { padding: 1rem; margin-bottom: 1rem; background-color: white; border-radius: 8px; cursor: pointer; }
+        .task:hover { box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1); transition: box-shadow 0.3s ease-in-out; }
     </style>
-
-
-
-
-
 </head>
-<body class="bg-blue-600 pt-20 h-screen">
-    <div class="flex h-full w-11/12 space-x-6 mx-auto py-10">
+<body class="bg-gray-100 pt-28">
 
-        <div class="w-1/3 bg-gray-900 text-white p-4 rounded-lg shadow-lg flex flex-col">
-            <div class="flex justify-between mb-4">
-                <h1 class="text-xl font-semibold">All my tasks</h1>
-            </div>
-            <ul class="space-y-3 flex-1 overflow-y-auto" id="task-list">
-                <?php foreach ($groupedTasks as $group => $tasks): ?>
-                    <?php if (!empty($tasks)): ?>
-                        <h2 class="text-lg font-semibold text-gray-300 mt-4"><?= ucfirst(str_replace('_', ' ', $group)) ?></h2>
-                        <?php foreach ($tasks as $task): ?>
-                            <li class="flex items-center justify-between bg-gray-700 p-3 rounded-md cursor-pointer hover:bg-gray-600">
-                                <div class="flex items-center">
-                                    <div class="w-1 h-full bg-green-500 mr-3"></div>
-                                    <input type="checkbox" id="task-<?= $task['id'] ?>" class="mr-3 task-checkbox" data-task-id="<?= $task['id'] ?>" <?= $task['is_completed'] == 1 ? 'checked' : '' ?>>
-                                    <label for="task-<?= $task['id'] ?>" class="task-label <?= $task['is_completed'] == 1 ? 'line-through' : '' ?>">
-                                        <?= htmlspecialchars($task['task_name']) ?>
-                                    </label>
-                                </div>
-                                <div class="flex items-center space-x-2">
-                                    <span class="text-gray-300"><?= (new DateTime($task['due_date']))->format('M d') ?></span>
-                                    <button class="text-red-500 hover:text-red-700" onclick="deleteTask(<?= $task['id'] ?>, event)">Delete</button>
-                                </div>
+    <div class="container mx-auto px-4">
+        <h1 class="text-3xl font-semibold text-gray-800 mb-6">My Task Overview</h1>
+
+        <!-- Filter -->
+        <div class="flex justify-between mb-6">
+            <select class="form-select" id="categoryFilter">
+                <option value="">All Categories</option>
+                <option value="work">Work</option>
+                <option value="personal">Personal</option>
+            </select>
+        </div>
+
+        <!-- Task Grids -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Today's Tasks -->
+            <div class="bg-white shadow-lg rounded-lg p-4 task-group">
+                <h2 class="text-xl font-semibold text-gray-700">Today's Tasks</h2>
+                <div class="relative pt-1">
+                    <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-green-200">
+                        <div style="width:<?= calculateProgress($groupedTasks['today']) ?>%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500"></div>
+                    </div>
+                    <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-green-600">
+                        <?= round(calculateProgress($groupedTasks['today'])) ?>% Completed
+                    </span>
+                </div>
+                <ul id="sortable-today" class="mt-4 space-y-4">
+                    <?php if (!empty($groupedTasks['today'])): ?>
+                        <?php foreach ($groupedTasks['today'] as $task): ?>
+                            <li draggable="true" class="flex items-center justify-between p-3 border-b task" data-id="<?= $task['id'] ?>">
+                                <input type="checkbox" id="task-<?= $task['id'] ?>" <?= $task['is_completed'] ? 'checked' : '' ?>>
+                                <label for="task-<?= $task['id'] ?>" class="<?= $task['is_completed'] ? 'line-through text-gray-400' : 'text-gray-800' ?>"><?= htmlspecialchars($task['task_name']) ?></label>
+                                <span class="text-gray-500"><?= (new DateTime($task['due_date']))->format('M d') ?></span>
                             </li>
                         <?php endforeach; ?>
+                    <?php else: ?>
+                        <li class="text-gray-400">No tasks for today</li>
                     <?php endif; ?>
-                <?php endforeach; ?>
+                </ul>
+            </div>
+
+            <!-- Tomorrow's Tasks -->
+            <div class="bg-white shadow-lg rounded-lg p-4 task-group">
+                <h2 class="text-xl font-semibold text-gray-700">Tomorrow's Tasks</h2>
+                <ul id="sortable-tomorrow" class="mt-4 space-y-4">
+                    <?php if (!empty($groupedTasks['tomorrow'])): ?>
+                        <?php foreach ($groupedTasks['tomorrow'] as $task): ?>
+                            <li draggable="true" class="flex items-center justify-between p-3 border-b task" data-id="<?= $task['id'] ?>">
+                                <input type="checkbox" id="task-<?= $task['id'] ?>" <?= $task['is_completed'] ? 'checked' : '' ?>>
+                                <label for="task-<?= $task['id'] ?>" class="<?= $task['is_completed'] ? 'line-through text-gray-400' : 'text-gray-800' ?>"><?= htmlspecialchars($task['task_name']) ?></label>
+                                <span class="text-gray-500"><?= (new DateTime($task['due_date']))->format('M d') ?></span>
+                            </li>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <li class="text-gray-400">No tasks for tomorrow</li>
+                    <?php endif; ?>
+                </ul>
+            </div>
+
+            <!-- Upcoming Tasks -->
+            <div class="bg-white shadow-lg rounded-lg p-4 task-group">
+                <h2 class="text-xl font-semibold text-gray-700">This Week's Tasks</h2>
+                <ul id="sortable-upcoming" class="mt-4 space-y-4">
+                    <?php if (!empty($groupedTasks['this_week'])): ?>
+                        <?php foreach ($groupedTasks['this_week'] as $task): ?>
+                            <li draggable="true" class="flex items-center justify-between p-3 border-b task" data-id="<?= $task['id'] ?>">
+                                <input type="checkbox" id="task-<?= $task['id'] ?>" <?= $task['is_completed'] ? 'checked' : '' ?>>
+                                <label for="task-<?= $task['id'] ?>" class="<?= $task['is_completed'] ? 'line-through text-gray-400' : 'text-gray-800' ?>"><?= htmlspecialchars($task['task_name']) ?></label>
+                                <span class="text-gray-500"><?= (new DateTime($task['due_date']))->format('M d') ?></span>
+                            </li>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <li class="text-gray-400">No upcoming tasks</li>
+                    <?php endif; ?>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Later Tasks -->
+        <div class="mt-8">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Later Tasks</h2>
+            <ul id="sortable-later" class="space-y-4">
+                <?php if (!empty($groupedTasks['later'])): ?>
+                    <?php foreach ($groupedTasks['later'] as $task): ?>
+                        <li draggable="true" class="flex items-center justify-between p-3 border-b task" data-id="<?= $task['id'] ?>">
+                            <input type="checkbox" id="task-<?= $task['id'] ?>" <?= $task['is_completed'] ? 'checked' : '' ?>>
+                            <label for="task-<?= $task['id'] ?>" class="<?= $task['is_completed'] ? 'line-through text-gray-400' : 'text-gray-800' ?>"><?= htmlspecialchars($task['task_name']) ?></label>
+                            <span class="text-gray-500"><?= (new DateTime($task['due_date']))->format('M d') ?></span>
+                        </li>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <li class="text-gray-400">No later tasks</li>
+                <?php endif; ?>
             </ul>
-            <button class="mt-4 p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg" id="add-task-btn">+ Add task</button>
-        </div>
-
-        <div class="w-2/3 bg-gray-100 p-6 rounded-lg shadow-lg" id="task-details">
-            <div class="flex justify-between">
-                <h2 class="text-2xl font-semibold">Task Details</h2>
-            </div>
-            <div class="bg-white p-4 mt-6 rounded-lg shadow-lg">
-                <p class="text-gray-600">Please select a task to see the details.</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="add-task-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-        <div class="bg-white p-4 rounded-lg shadow-lg w-1/3 relative" id="modal-content">
-            <h2 class="text-xl font-semibold mb-4">Add New Task</h2>
-            <form id="add-task-form">
-                <input type="text" name="task_name" placeholder="Task Name" class="p-2 border rounded-md w-full mb-3" required>
-                <textarea name="notes" placeholder="Notes" class="p-2 border rounded-md w-full mb-3"></textarea>
-                <input type="date" name="due_date" class="p-2 border rounded-md w-full mb-3" required>
-                <button type="submit" class="bg-blue-600 text-white p-2 rounded-md w-full">Add Task</button>
-            </form>
         </div>
     </div>
 
     <script>
-        function loadTaskDetails(taskId) {
-            fetch(`get_task.php?task_id=${taskId}`)
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function () {
+                const taskId = this.closest('.task').dataset.id;  // Ambil task ID dari atribut data-id
+                const isCompleted = this.checked ? 1 : 0;  // Cek status checkbox
+
+                // Tentukan URL yang sesuai berdasarkan status is_completed
+                const url = isCompleted ? 'mark_complete.php' : 'mark_uncomplete.php';
+
+                // Kirimkan request ke server
+                fetch(url + '?task_id=' + taskId, {
+                    method: 'POST',
+                })
                 .then(response => response.json())
                 .then(data => {
-                    const detailsSection = document.getElementById('task-details');
-                    detailsSection.innerHTML = `
-                        <div class="flex justify-between">
-                            <h2 class="text-2xl font-semibold">Task Details</h2>
-                            <button class="text-gray-500 hover:text-gray-800" onclick="markTaskComplete(${taskId})">Mark as complete</button>
-                        </div>
-                        <div class="bg-white p-4 mt-6 rounded-lg shadow-lg">
-                            <h3 class="text-xl font-semibold">${data.task_name}</h3>
-                            <p class="text-gray-600">Status: ${data.is_completed ? 'Completed' : 'Pending'}</p>
-                            <p class="text-gray-600">Due Date: ${data.due_date}</p>
-                            <h4 class="text-lg font-semibold mt-4">Notes</h4>
-                            <p class="text-gray-600">${data.notes}</p>
-                        </div>
-                    `;
-                });
-        }
-
-        function markTaskComplete(taskId) {
-            fetch(`mark_complete.php?task_id=${taskId}`, { method: 'POST' })
-                .then(() => {
-                    const checkbox = document.getElementById(`task-${taskId}`);
-                    checkbox.checked = true;
-                    const label = document.querySelector(`label[for="task-${taskId}"]`);
-                    label.classList.add('line-through');
-                    loadTaskDetails(taskId);
-                });
-        }
-
-        function markTaskUncomplete(taskId) {
-            fetch(`mark_uncomplete.php?task_id=${taskId}`, { method: 'POST' })
-                .then(() => {
-                    const checkbox = document.getElementById(`task-${taskId}`);
-                    checkbox.checked = false;
-                    const label = document.querySelector(`label[for="task-${taskId}"]`);
-                    label.classList.remove('line-through');
-                    loadTaskDetails(taskId);
-                });
-        }
-
-        document.getElementById('add-task-btn').addEventListener('click', () => {
-            document.getElementById('add-task-modal').classList.remove('hidden');
-        });
-
-        document.getElementById('add-task-modal').addEventListener('click', (e) => {
-            if (e.target === document.getElementById('add-task-modal')) {
-                document.getElementById('add-task-modal').classList.add('hidden');
-            }
-        });
-
-        document.getElementById('add-task-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-
-            fetch('add_task.php', {
-                method: 'POST',
-                body: formData,
-            })
-            .then(() => {
-                location.reload();
-            });
-        });
-
-        function deleteTask(taskId, event) {
-            event.stopPropagation(); 
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "This task will be permanently deleted!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, delete it!',
-                cancelButtonText: 'Cancel',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Jika user mengkonfirmasi, hapus task
-                    fetch(`delete_task.php?task_id=${taskId}`, { method: 'POST' })
-                        .then(response => response.json())
-                        .then(result => {
-                            if (result.success) {
-                                const taskItem = document.getElementById(`task-${taskId}`).closest('li');
-                                taskItem.remove(); // Hapus elemen task dari DOM
-
-                                Swal.fire(
-                                    'Deleted!',
-                                    'Your task has been deleted.',
-                                    'success'
-                                );
-                            } else {
-                                Swal.fire(
-                                    'Failed!',
-                                    'There was an issue deleting the task.',
-                                    'error'
-                                );
-                            }
-                        });
-                }
-            });
-        }
-
-
-
-
-
-        document.querySelectorAll('.task-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', (e) => {
-                const taskId = e.target.dataset.taskId;
-                if (e.target.checked) {
-                    markTaskComplete(taskId);
-                } else {
-                    markTaskUncomplete(taskId);
-                }
-            });
-        });
-
-        document.querySelectorAll('#task-list li').forEach(item => {
-            item.addEventListener('click', () => {
-                const taskId = item.querySelector('.task-checkbox').dataset.taskId;
-                loadTaskDetails(taskId);
+                    if (data.success) {
+                        const label = document.querySelector(`label[for="task-${taskId}"]`);
+                        if (isCompleted) {
+                            label.classList.add('line-through', 'text-gray-400');  // Ubah gaya teks jika selesai
+                            console.log("Task marked as completed.");
+                        } else {
+                            label.classList.remove('line-through', 'text-gray-400');  // Kembalikan gaya teks jika belum selesai
+                            console.log("Task marked as uncompleted.");
+                        }
+                    } else {
+                        console.error("Failed to update task status.");
+                    }
+                })
+                .catch(error => console.error('Error:', error));
             });
         });
     </script>
+
 </body>
 </html>
