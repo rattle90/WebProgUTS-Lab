@@ -102,7 +102,8 @@ $groupedTasks = groupTasksByDueDate($tasks);
                     <?php if (!empty($groupedTasks['today'])): ?>
                         <?php foreach ($groupedTasks['today'] as $task): ?>
                             <li draggable="true" class="flex items-center justify-between p-3 border-b task" data-id="<?= $task['id'] ?>">
-                                <span class="<?= $task['is_completed'] ? 'line-through text-gray-400' : 'text-gray-800' ?>"><?= htmlspecialchars($task['task_name']) ?></span>
+                                <input type="checkbox" id="task-<?= $task['id'] ?>" <?= $task['is_completed'] ? 'checked' : '' ?>>
+                                <label for="task-<?= $task['id'] ?>" class="<?= $task['is_completed'] ? 'line-through text-gray-400' : 'text-gray-800' ?>"><?= htmlspecialchars($task['task_name']) ?></label>
                                 <span class="text-gray-500"><?= (new DateTime($task['due_date']))->format('M d') ?></span>
                             </li>
                         <?php endforeach; ?>
@@ -119,7 +120,8 @@ $groupedTasks = groupTasksByDueDate($tasks);
                     <?php if (!empty($groupedTasks['tomorrow'])): ?>
                         <?php foreach ($groupedTasks['tomorrow'] as $task): ?>
                             <li draggable="true" class="flex items-center justify-between p-3 border-b task" data-id="<?= $task['id'] ?>">
-                                <span class="<?= $task['is_completed'] ? 'line-through text-gray-400' : 'text-gray-800' ?>"><?= htmlspecialchars($task['task_name']) ?></span>
+                                <input type="checkbox" id="task-<?= $task['id'] ?>" <?= $task['is_completed'] ? 'checked' : '' ?>>
+                                <label for="task-<?= $task['id'] ?>" class="<?= $task['is_completed'] ? 'line-through text-gray-400' : 'text-gray-800' ?>"><?= htmlspecialchars($task['task_name']) ?></label>
                                 <span class="text-gray-500"><?= (new DateTime($task['due_date']))->format('M d') ?></span>
                             </li>
                         <?php endforeach; ?>
@@ -136,7 +138,8 @@ $groupedTasks = groupTasksByDueDate($tasks);
                     <?php if (!empty($groupedTasks['this_week'])): ?>
                         <?php foreach ($groupedTasks['this_week'] as $task): ?>
                             <li draggable="true" class="flex items-center justify-between p-3 border-b task" data-id="<?= $task['id'] ?>">
-                                <span class="<?= $task['is_completed'] ? 'line-through text-gray-400' : 'text-gray-800' ?>"><?= htmlspecialchars($task['task_name']) ?></span>
+                                <input type="checkbox" id="task-<?= $task['id'] ?>" <?= $task['is_completed'] ? 'checked' : '' ?>>
+                                <label for="task-<?= $task['id'] ?>" class="<?= $task['is_completed'] ? 'line-through text-gray-400' : 'text-gray-800' ?>"><?= htmlspecialchars($task['task_name']) ?></label>
                                 <span class="text-gray-500"><?= (new DateTime($task['due_date']))->format('M d') ?></span>
                             </li>
                         <?php endforeach; ?>
@@ -154,7 +157,8 @@ $groupedTasks = groupTasksByDueDate($tasks);
                 <?php if (!empty($groupedTasks['later'])): ?>
                     <?php foreach ($groupedTasks['later'] as $task): ?>
                         <li draggable="true" class="flex items-center justify-between p-3 border-b task" data-id="<?= $task['id'] ?>">
-                            <span class="<?= $task['is_completed'] ? 'line-through text-gray-400' : 'text-gray-800' ?>"><?= htmlspecialchars($task['task_name']) ?></span>
+                            <input type="checkbox" id="task-<?= $task['id'] ?>" <?= $task['is_completed'] ? 'checked' : '' ?>>
+                            <label for="task-<?= $task['id'] ?>" class="<?= $task['is_completed'] ? 'line-through text-gray-400' : 'text-gray-800' ?>"><?= htmlspecialchars($task['task_name']) ?></label>
                             <span class="text-gray-500"><?= (new DateTime($task['due_date']))->format('M d') ?></span>
                         </li>
                     <?php endforeach; ?>
@@ -166,60 +170,48 @@ $groupedTasks = groupTasksByDueDate($tasks);
     </div>
 
     <script>
-        // Drag and Drop Feature
-        const sortableToday = document.getElementById('sortable-today');
-        const sortableTomorrow = document.getElementById('sortable-tomorrow');
-        const sortableUpcoming = document.getElementById('sortable-upcoming');
-        const sortableLater = document.getElementById('sortable-later');
-
-        [sortableToday, sortableTomorrow, sortableUpcoming, sortableLater].forEach(list => {
-            list.addEventListener('dragstart', function(e) {
-                e.target.classList.add('dragging');
-            });
-
-            list.addEventListener('dragend', function(e) {
-                e.target.classList.remove('dragging');
-            });
-
-            list.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                const dragging = document.querySelector('.dragging');
-                this.appendChild(dragging);
-            });
-        });
-
-        // Dark Mode Toggle
+        // Toggle Dark Mode
         const toggleDarkMode = document.getElementById('toggleDarkMode');
-        toggleDarkMode.addEventListener('click', function() {
+        toggleDarkMode.addEventListener('click', () => {
             document.body.classList.toggle('dark-mode');
         });
 
-        // Search Filter
-        document.getElementById('taskSearch').addEventListener('input', function(e) {
-            const searchValue = e.target.value.toLowerCase();
-            const tasks = document.querySelectorAll('.task');
-            
-            tasks.forEach(task => {
-                const taskName = task.querySelector('span').textContent.toLowerCase();
-                if (taskName.includes(searchValue)) {
-                    task.style.display = '';
-                } else {
-                    task.style.display = 'none';
-                }
+        // Implementing Drag and Drop functionality
+        const taskGroups = document.querySelectorAll('.task-group');
+
+        taskGroups.forEach(group => {
+            group.addEventListener('dragover', (event) => {
+                event.preventDefault();
+            });
+
+            group.addEventListener('drop', (event) => {
+                const taskId = event.dataTransfer.getData('text/plain');
+                const taskElement = document.querySelector(`.task[data-id="${taskId}"]`);
+                group.appendChild(taskElement);
             });
         });
 
-        // Click to view task details
-        document.querySelectorAll('.task').forEach(taskElement => {
-            taskElement.addEventListener('click', function() {
-                const taskId = this.getAttribute('data-id');
-                fetch(`get_task.php?task_id=${taskId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        // Tampilkan detail task di sini
-                        alert(`Task: ${data.task_name}\nDue Date: ${data.due_date}\nDescription: ${data.description}`);
-                    })
-                    .catch(error => console.error('Error fetching task details:', error));
+        const tasks = document.querySelectorAll('.task');
+        tasks.forEach(task => {
+            task.addEventListener('dragstart', (event) => {
+                event.dataTransfer.setData('text/plain', task.dataset.id);
+            });
+        });
+
+        // Checkbox change event
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function () {
+                const taskId = this.parentElement.dataset.id;
+                const isChecked = this.checked ? 1 : 0;
+                
+                fetch('mark_complete.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id: taskId, is_completed: isChecked })
+                });
             });
         });
     </script>
