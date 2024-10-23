@@ -24,6 +24,20 @@ foreach ($tasks as $task) {
     }
     $tasksByDate[$dueDate][] = $task;
 }
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $input = json_decode(file_get_contents('php://input'), true);
+    if (isset($input['id']) && isset($input['is_completed'])) {
+        $taskId = $input['id'];
+        $isCompleted = $input['is_completed'] ? 1 : 0;
+
+        $updateQuery = $pdo->prepare("UPDATE tasks SET is_completed = ? WHERE id = ? AND user_id = ?");
+        $updateQuery->execute([$isCompleted, $taskId, $userId]);
+
+        echo json_encode(['success' => true]);
+        exit;
+    }
+}
 ?>
 
 <!DOCTYPE html>
