@@ -68,6 +68,12 @@ switch ($filter) {
     case 'later':
         $filteredTasks = ['later' => $groupedTasks['later']];
         break;
+    case 'completed': // New
+        $filteredTasks = ['completed' => array_filter($tasks, fn($task) => $task['is_completed'] == 1)];
+        break;
+    case 'uncompleted': // New
+        $filteredTasks = ['uncompleted' => array_filter($tasks, fn($task) => $task['is_completed'] == 0)];
+        break;
     default:
         $filteredTasks = $groupedTasks; // Menampilkan semua tugas jika tidak ada filter
         break;
@@ -99,6 +105,8 @@ switch ($filter) {
                     <option value="tomorrow" <?= $filter == 'tomorrow' ? 'selected' : '' ?>>Tomorrow</option>
                     <option value="this_week" <?= $filter == 'this_week' ? 'selected' : '' ?>>This Week</option>
                     <option value="later" <?= $filter == 'later' ? 'selected' : '' ?>>Later</option>
+                    <option value="completed" <?= $filter == 'completed' ? 'selected' : '' ?>>Completed</option> <!-- New -->
+                    <option value="uncompleted" <?= $filter == 'uncompleted' ? 'selected' : '' ?>>Uncompleted</option> <!-- New -->
                 </select>
             </div>
             <ul class="space-y-3 flex-1 overflow-y-auto" id="task-list">
