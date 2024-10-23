@@ -166,27 +166,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         function toggleCompletion(taskId) {
             const checkbox = document.getElementById(`checkbox-${taskId}`);
             const isChecked = checkbox.checked;
+            const taskNameElement = document.querySelector(`#task-${taskId} .task-name`);
 
-            fetch('next7days.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ id: taskId, is_completed: isChecked }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const taskNameElement = document.querySelector(`#task-${taskId} .task-name`);
-                    if (isChecked) {
-                        taskNameElement.classList.add('completed');
-                    } else {
-                        taskNameElement.classList.remove('completed');
-                    }
-                }
-            })
-            .catch(error => console.error('Error:', error));
+            // Update UI directly
+            if (isChecked) {
+                markTaskComplete(taskId);
+            } else {
+                markTaskUncomplete(taskId);
+            }
         }
+
+        function markTaskComplete(taskId) {
+            fetch(`mark_complete.php?task_id=${taskId}`, { method: 'POST' })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    const checkbox = document.getElementById(`checkbox-${taskId}`);
+                    checkbox.checked = true; // Check the checkbox
+                    const taskNameElement = document.querySelector(`#task-${taskId} .task-name`);
+                    taskNameElement.classList.add('completed'); // Add line-through class
+                })
+                .catch(error => {
+                    console.error('Error marking task complete:', error);
+                    const checkbox = document.getElementById(`checkbox-${taskId}`);
+                    checkbox.checked = false; // Revert checkbox if there's an error
+                    const taskNameElement = document.querySelector(`#task-${taskId} .task-name`);
+                    taskNameElement.classList.remove('completed'); // Revert line-through class
+                });
+        }
+
+        function markTaskUncomplete(taskId) {
+            fetch(`mark_uncomplete.php?task_id=${taskId}`, { method: 'POST' })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    const checkbox = document.getElementById(`checkbox-${taskId}`);
+                    checkbox.checked = false; // Uncheck the checkbox
+                    const taskNameElement = document.querySelector(`#task-${taskId} .task-name`);
+                    taskNameElement.classList.remove('completed'); // Remove line-through class
+                })
+                .catch(error => {
+                    console.error('Error marking task uncomplete:', error);
+                    const checkbox = document.getElementById(`checkbox-${taskId}`);
+                    checkbox.checked = true; // Revert checkbox if there's an error
+                    const taskNameElement = document.querySelector(`#task-${taskId} .task-name`);
+                    taskNameElement.classList.add('completed'); // Revert line-through class
+                });
+        }
+
+
     </script>
 
 </body>
