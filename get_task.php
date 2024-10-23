@@ -13,4 +13,7 @@ if (isset($_GET['task_id'])) {
 
     // Mengembalikan data dalam format JSON
     echo json_encode($task);
+} else {
+    // Return an error if task_id is not provided
+    echo json_encode(['error' => 'Task ID not provided']);
 }
