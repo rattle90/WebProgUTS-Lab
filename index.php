@@ -137,23 +137,31 @@ $groupedTasks = groupTasksByDueDate($tasks);
 
 <script>
     document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-        checkbox.addEventListener('change', function () {
-            const taskId = this.closest('.task').dataset.id;
-            const isCompleted = this.checked ? 1 : 0;
-            const url = isCompleted ? 'mark_complete.php' : 'mark_uncomplete.php';
+    checkbox.addEventListener('change', function () {
+        const taskId = this.closest('.task').dataset.id;
+        const isCompleted = this.checked ? 1 : 0;
+        const url = isCompleted ? 'mark_complete.php' : 'mark_uncomplete.php';
 
-            fetch(url + '?task_id=' + taskId, { method: 'POST' })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const label = this.nextElementSibling;
-                        label.classList.toggle('line-through', isCompleted);
-                        label.classList.toggle('text-gray-400', isCompleted);
+        fetch(url + '?task_id=' + taskId, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const label = this.nextElementSibling;
+                    if (isCompleted) {
+                        // Ketika dicentang
+                        label.classList.add('line-through', 'text-gray-400'); // Coret dan ubah ke warna abu-abu
+                        label.classList.remove('text-gray-800'); // Hapus warna hitam
                     } else {
-                        alert('Failed to update task status.');
+                        // Ketika tidak dicentang
+                        label.classList.remove('line-through'); // Hapus coretan
+                        label.classList.remove('text-gray-400'); // Hapus warna abu-abu
+                        label.classList.add('text-gray-800'); // Kembalikan ke warna hitam
                     }
-                })
-                .catch(error => console.error('Error:', error));
+                } else {
+                    alert('Failed to update task status.');
+                }
+            })
+            .catch(error => console.error('Error:', error));
         });
     });
 
