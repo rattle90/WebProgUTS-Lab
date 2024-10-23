@@ -64,7 +64,7 @@ $groupedTasks = groupTasksByDueDate($tasks);
     <p class="text-gray-600 text-left mb-4">“Tetapi kamu ini, kuatkanlah hatimu, jangan lemah semangatmu, karena ada upah bagi usahamu!”</p>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <?php foreach (['today', 'tomorrow', 'this_week'] as $group): ?>
-            <div class="bg-white shadow-lg rounded-lg p-4 task-group">
+            <div class="bg-white shadow-lg rounded-lg p-4 task-group" data-group="<?= $group ?>">
                 <h2 class="text-xl font-semibold text-gray-700"><?= ucfirst(str_replace('_', ' ', $group)) ?></h2>
                 
                 <?php $progress = calculateProgress($groupedTasks[$group]); ?>
@@ -72,17 +72,20 @@ $groupedTasks = groupTasksByDueDate($tasks);
                     <div class="bg-gray-200 rounded-full h-2">
                         <div class="bg-green-500 h-2 rounded-full" style="width: <?= $progress ?>%;"></div>
                     </div>
-                    <span class="absolute right-0 text-xs text-gray-500 font-semibold"><?= round($progress) ?>% completed</span>
+                    <span class="absolute right-0 text-xs text-gray-500 font-semibold progress-text"><?= round($progress) ?>% completed</span>
                 </div>
                 
                 <ul class="mt-4 space-y-4">
                     <?php if (!empty($groupedTasks[$group])): ?>
                         <?php foreach ($groupedTasks[$group] as $task): ?>
                             <li class="task flex justify-between items-center" data-id="<?= $task['id'] ?>">
-                                <input type="checkbox" <?= $task['is_completed'] ? 'checked' : '' ?>>
-                                <label class="<?= $task['is_completed'] ? 'line-through text-gray-400' : 'text-gray-800' ?>">
-                                    <?= htmlspecialchars($task['task_name']) ?>
-                                </label>
+                                <div class="flex items-center space-x-4">
+                                    <input id="checkbox-<?= $task['id'] ?>" type="checkbox" <?= $task['is_completed'] ? 'checked' : '' ?> onchange="toggleTaskStatus(<?= $task['id'] ?>, '<?= $group ?>')">
+                                    <label for="checkbox-<?= $task['id'] ?>" class="<?= $task['is_completed'] ? 'line-through text-gray-400' : 'text-gray-800' ?>">
+                                        <?= htmlspecialchars($task['task_name']) ?>
+                                    </label>
+                                </div>
+                                <span class="text-gray-500 text-sm"><?= (new DateTime($task['due_date']))->format('d M') ?></span>
                                 <button onclick="openModal(<?= $task['id'] ?>)" class="text-blue-500">View</button>
                             </li>
                         <?php endforeach; ?>
@@ -95,7 +98,7 @@ $groupedTasks = groupTasksByDueDate($tasks);
     </div>
 
     <!-- Later Task Group -->
-    <div class="mt-6 bg-white shadow-lg rounded-lg p-4 task-group md:col-span-3">
+    <div class="mt-6 bg-white shadow-lg rounded-lg p-4 task-group md:col-span-3" data-group="later">
         <h2 class="text-xl font-semibold text-gray-700">Later</h2>
         
         <?php $progress = calculateProgress($groupedTasks['later']); ?>
@@ -103,17 +106,20 @@ $groupedTasks = groupTasksByDueDate($tasks);
             <div class="bg-gray-200 rounded-full h-2">
                 <div class="bg-green-500 h-2 rounded-full" style="width: <?= $progress ?>%;"></div>
             </div>
-            <span class="absolute right-0 text-xs text-gray-500 font-semibold"><?= round($progress) ?>% completed</span>
+            <span class="absolute right-0 text-xs text-gray-500 font-semibold progress-text"><?= round($progress) ?>% completed</span>
         </div>
         
         <ul class="mt-4 space-y-4">
             <?php if (!empty($groupedTasks['later'])): ?>
                 <?php foreach ($groupedTasks['later'] as $task): ?>
                     <li class="task flex justify-between items-center" data-id="<?= $task['id'] ?>">
-                        <input type="checkbox" <?= $task['is_completed'] ? 'checked' : '' ?>>
-                        <label class="<?= $task['is_completed'] ? 'line-through text-gray-400' : 'text-gray-800' ?>">
-                            <?= htmlspecialchars($task['task_name']) ?>
-                        </label>
+                        <div class="flex items-center space-x-4">
+                            <input id="checkbox-<?= $task['id'] ?>" type="checkbox" <?= $task['is_completed'] ? 'checked' : '' ?> onchange="toggleTaskStatus(<?= $task['id'] ?>, 'later')">
+                            <label for="checkbox-<?= $task['id'] ?>" class="<?= $task['is_completed'] ? 'line-through text-gray-400' : 'text-gray-800' ?>">
+                                <?= htmlspecialchars($task['task_name']) ?>
+                            </label>
+                        </div>
+                        <span class="text-gray-500 text-sm"><?= (new DateTime($task['due_date']))->format('d M Y') ?></span>
                         <button onclick="openModal(<?= $task['id'] ?>)" class="text-blue-500">View</button>
                     </li>
                 <?php endforeach; ?>
@@ -136,45 +142,79 @@ $groupedTasks = groupTasksByDueDate($tasks);
 </div>
 
 <script>
-    document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-        checkbox.addEventListener('change', function () {
-            const taskId = this.closest('.task').dataset.id;
-            const isCompleted = this.checked ? 1 : 0;
-            const url = isCompleted ? 'mark_complete.php' : 'mark_uncomplete.php';
+    function toggleTaskStatus(taskId, group) {
+        const checkbox = document.getElementById(`checkbox-${taskId}`);
+        if (checkbox.checked) {
+            markTaskComplete(taskId, group);
+        } else {
+            markTaskUncomplete(taskId, group);
+        }
+    }
 
-            fetch(url + '?task_id=' + taskId, { method: 'POST' })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const label = this.nextElementSibling;
-                        label.classList.toggle('line-through', isCompleted);
-                        label.classList.toggle('text-gray-400', isCompleted);
-                    } else {
-                        alert('Failed to update task status.');
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-        });
-    });
-
-    function openModal(taskId) {
-        fetch('get_task.php?task_id=' + taskId)
-            .then(response => response.json())
-            .then(task => {
-                document.getElementById('task-content').innerHTML = `
-                    <p><strong>Name:</strong> ${task.task_name}</p>
-                    <p><strong>Notes:</strong> ${task.notes || 'No notes.'}</p>
-                    <p><strong>Due Date:</strong> ${new Date(task.due_date).toLocaleDateString()}</p>
-                `;
-                document.getElementById('task-modal').classList.remove('hidden');
+    function markTaskComplete(taskId, group) {
+        fetch(`mark_complete.php?task_id=${taskId}`, { method: 'POST' })
+            .then(() => {
+                const checkbox = document.getElementById(`checkbox-${taskId}`);
+                checkbox.checked = true;
+                const label = document.querySelector(`label[for="checkbox-${taskId}"]`);
+                label.classList.add('line-through');
+                label.classList.add('text-gray-400');
+                updateProgress(group);
             })
             .catch(error => console.error('Error:', error));
     }
 
+    function markTaskUncomplete(taskId, group) {
+        fetch(`mark_uncomplete.php?task_id=${taskId}`, { method: 'POST' })
+            .then(() => {
+                const checkbox = document.getElementById(`checkbox-${taskId}`);
+                checkbox.checked = false;
+                const label = document.querySelector(`label[for="checkbox-${taskId}"]`);
+                label.classList.remove('line-through');
+                label.classList.remove('text-gray-400');
+                updateProgress(group);
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function updateProgress(group) {
+        const tasks = document.querySelectorAll(`.task-group[data-group="${group}"] .task input[type="checkbox"]`);
+        let completedCount = 0;
+        tasks.forEach(task => {
+            if (task.checked) {
+                completedCount++;
+            }
+        });
+        const progress = tasks.length > 0 ? (completedCount / tasks.length) * 100 : 0;
+        const progressBar = document.querySelector(`.task-group[data-group="${group}"] .bg-green-500`);
+        const progressText = document.querySelector(`.task-group[data-group="${group}"] .progress-text`);
+        
+        progressBar.style.width = `${progress}%`;
+        progressText.innerText = `${Math.round(progress)}% completed`;
+    }
+
+    function openModal(taskId) {
+        const modal = document.getElementById('task-modal');
+        const content = document.getElementById('task-content');
+        
+        // Fetch task details from server (implement this part)
+        fetch(`get_task.php?task_id=${taskId}`)
+            .then(response => response.json())
+            .then(data => {
+                content.innerHTML = `
+                    <h3 class="text-lg font-semibold">${data.task_name}</h3>
+                    <p>Due Date: ${data.due_date}</p>
+                    <p>Status: ${data.is_completed ? 'Completed' : 'Pending'}</p>
+                `;
+                modal.classList.remove('hidden');
+            })
+            .catch(error => console.error('Error fetching task details:', error));
+    }
+
     function closeModal() {
-        document.getElementById('task-modal').classList.add('hidden');
+        const modal = document.getElementById('task-modal');
+        modal.classList.add('hidden');
     }
 </script>
-
 </body>
 </html>
