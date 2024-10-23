@@ -99,23 +99,24 @@ for ($i = 0; $i <= 6; $i++) { // Show current month and 6 months ahead
             </form>
         </div>
 
-        <div class="flex justify-center space-x-4 overflow-x-auto pb-4">
-            <?php
-            $current_day = strtotime($start_date);
-            while ($current_day <= strtotime($end_date)) {
-                $formatted_day = date('D j', $current_day);
-                $id_day = date('Y-m-d', $current_day);
-                $is_disabled = ($current_day < strtotime('today')) ? 'disabled' : '';
+        <div class="flex justify-start space-x-2 overflow-x-auto pb-4">
+        <?php
+        $current_day = strtotime($start_date);
+        while ($current_day <= strtotime($end_date)) {
+            $formatted_day = date('D j', $current_day);
+            $id_day = date('Y-m-d', $current_day);
+            $is_disabled = ($current_day < strtotime('today')) ? 'disabled' : '';
 
-                echo '<div class="flex-1 text-center scroll-to ' . $is_disabled . '" data-target="#task-' . $id_day . '-group" ' . ($is_disabled ? 'style="pointer-events:none;"' : '') . '>';
-                echo '<div class="text-center text-sm font-bold">' . date('D', $current_day) . '</div>';
-                echo '<div class="text-center text-lg font-bold">' . date('j', $current_day) . '</div>';
-                echo '</div>';
+            echo '<div class="w-20 text-center scroll-to ' . $is_disabled . '" data-target="#task-' . $id_day . '-group" ' . ($is_disabled ? 'style="pointer-events:none;"' : '') . '>';
+            echo '<div class="text-center text-sm font-bold">' . date('D', $current_day) . '</div>';
+            echo '<div class="text-center text-lg font-bold">' . date('j', $current_day) . '</div>';
+            echo '</div>';
 
-                $current_day = strtotime('+1 day', $current_day);
-            }
-            ?>
-        </div>
+            $current_day = strtotime('+1 day', $current_day);
+        }
+        ?>
+    </div>
+
 
         <?php
         $current_day = strtotime($start_date);
