@@ -173,6 +173,7 @@
         </div>
     </div>
 
+
     <script>
         let currentTaskId = null; // Store the currently viewed task ID
 
@@ -210,7 +211,7 @@
                             results.forEach(function(task) {
                                 const taskLink = document.createElement('a');
                                 taskLink.href = '#'; // Prevent default navigation
-                                taskLink.textContent = task.task_name;
+                                taskLink.innerHTML = `<strong>${task.task_name}</strong> <br> <small>${task.due_date}</small>`; // Display task name and due date
                                 taskLink.classList.add('block', 'hover:bg-gray-200', 'p-2'); // Add classes for styling
                                 taskLink.dataset.taskId = task.id; // Store task ID in data attribute
                                 searchResults.appendChild(taskLink);
@@ -227,7 +228,7 @@
                 searchResults.innerHTML = '';
                 searchResults.style.display = 'none';
             }
-        }, 300)); // Delay 300ms to wait before firing the AJAX request
+        }, 300));
 
         // Handle task click to open modal
         searchResults.addEventListener('click', function(e) {
@@ -268,43 +269,26 @@
         function markTaskComplete(taskId) {
             fetch(`mark_complete.php?task_id=${taskId}`, { method: 'POST' })
                 .then(() => {
-                    // Update the task status in the modal
-                    document.getElementById('task-status').textContent = 'Status: Completed';
-                    document.getElementById('mark-complete').style.display = 'none';
-                    document.getElementById('mark-uncomplete').style.display = 'inline-block';
-
-                    // Update checkbox and label for the task if needed
-                    const checkbox = document.getElementById(`checkbox-${taskId}`);
-                    if (checkbox) {
-                        checkbox.checked = true; // Assuming there's a checkbox element for this task
-                        const label = document.querySelector(`label[for="checkbox-${taskId}"]`);
-                        if (label) {
-                            label.classList.add('line-through'); // Add line-through effect to label
-                        }
-                    }
+                    // Update the task status in the modal immediately
+                    updateTaskStatusInModal('Completed', false);
                 });
         }
 
-        // Mark task as uncomplete
         function markTaskUncomplete(taskId) {
             fetch(`mark_uncomplete.php?task_id=${taskId}`, { method: 'POST' })
                 .then(() => {
-                    // Update the task status in the modal
-                    document.getElementById('task-status').textContent = 'Status: Not Completed';
-                    document.getElementById('mark-complete').style.display = 'inline-block';
-                    document.getElementById('mark-uncomplete').style.display = 'none';
-
-                    // Update checkbox and label for the task if needed
-                    const checkbox = document.getElementById(`checkbox-${taskId}`);
-                    if (checkbox) {
-                        checkbox.checked = false; // Assuming there's a checkbox element for this task
-                        const label = document.querySelector(`label[for="checkbox-${taskId}"]`);
-                        if (label) {
-                            label.classList.remove('line-through'); // Remove line-through effect from label
-                        }
-                    }
+                    // Update the task status in the modal immediately
+                    updateTaskStatusInModal('Not Completed', true);
                 });
         }
+
+        // Function to update task status in the modal
+        function updateTaskStatusInModal(status, isUncomplete) {
+            document.getElementById('task-status').textContent = 'Status: ' + status;
+            document.getElementById('mark-complete').style.display = isUncomplete ? 'inline-block' : 'none';
+            document.getElementById('mark-uncomplete').style.display = isUncomplete ? 'none' : 'inline-block';
+        }
+
 
         // Close modal
         document.querySelector('.close').onclick = function() {
@@ -318,6 +302,17 @@
                 modal.style.display = 'none';
             }
         };
+
+        function updateTaskStatusInModal(taskId, isCompleted) {
+            const checkbox = document.getElementById(`checkbox-${taskId}`);
+            if (checkbox) {
+                checkbox.checked = isCompleted;
+                const label = document.querySelector(`label[for="checkbox-${taskId}"]`);
+                if (label) {
+                    label.classList.toggle('line-through', isCompleted); // Toggle line-through effect
+                }
+            }
+        }
     </script>
 </body>
 </html>

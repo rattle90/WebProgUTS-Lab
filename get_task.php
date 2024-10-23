@@ -11,8 +11,13 @@ if (isset($_GET['task_id'])) {
     // Mengambil data tugas
     $task = $query->fetch(PDO::FETCH_ASSOC);
 
-    // Mengembalikan data dalam format JSON
-    echo json_encode($task);
+    if ($task) {
+        // Mengembalikan data tugas dalam format JSON
+        echo json_encode($task);
+    } else {
+        // Jika task tidak ditemukan, kirimkan error
+        echo json_encode(['error' => 'Task not found']);
+    }
 } else {
     // Return an error if task_id is not provided
     echo json_encode(['error' => 'Task ID not provided']);
