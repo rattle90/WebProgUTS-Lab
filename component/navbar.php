@@ -1,36 +1,3 @@
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
-
-<style>
-    .active {
-        background-color: #3b82f6;
-        color: white;
-        border-radius: 0.5rem;
-    }
-
-    .nav-link {
-        transition: background-color 0.3s, color 0.3s;
-        padding: 0.5rem 1rem;
-        border-radius: 0.5rem;
-    }
-
-    .nav-link:hover {
-        background-color: grey;
-        color: white;
-    }
-</style>
-
-<nav class="bg-gray-900 p-2 fixed top-0 left-0 right-0 z-10">
-    <div class="flex justify-center mb-2">
-        <div class="relative w-1/3">
-            <input type="text" placeholder="Search" class="bg-gray-800 text-gray-400 px-4 py-1 rounded-full w-full pl-10" />
-            <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M12.9 14.32a8 8 0 111.4-1.4l4.28 4.3a1 1 0 01-1.42 1.4l-4.26-4.3zm-5.4-3.32a6 6 0 1112 0 6 6 0 01-12 0z" clip-rule="evenodd" />
-                </svg>
-            </span>
-        </div>
-    </div>
-</nav>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -139,17 +106,17 @@
             </div>
 
             <div class="flex-grow flex justify-center space-x-2">
-                <a href="./index.php" class="nav-link text-gray-400 font-medium text-lg flex items-center">My Dashboard</a>
-                <a href="./alltask.php" class="nav-link text-gray-400 font-medium text-lg flex items-center">All Task</a>
-                <a href="./next7days.php" class="nav-link text-gray-400 font-medium text-lg flex items-center">Next 7 Days</a>
-                <a href="./upcoming.php" class="nav-link text-gray-400 font-medium text-lg flex items-center">Upcoming</a>
+                <a href="./index.php" class="nav-link text-gray-400 font-medium text-lg flex items-center <?php echo (basename($_SERVER['PHP_SELF']) == 'index.php') ? 'active' : ''; ?>">My Dashboard</a>
+                <a href="./alltask.php" class="nav-link text-gray-400 font-medium text-lg flex items-center <?php echo (basename($_SERVER['PHP_SELF']) == 'alltask.php') ? 'active' : ''; ?>">All Task</a>
+                <a href="./next7days.php" class="nav-link text-gray-400 font-medium text-lg flex items-center <?php echo (basename($_SERVER['PHP_SELF']) == 'next7days.php') ? 'active' : ''; ?>">Next 7 Days</a>
+                <a href="./upcoming.php" class="nav-link text-gray-400 font-medium text-lg flex items-center <?php echo (basename($_SERVER['PHP_SELF']) == 'upcoming.php') ? 'active' : ''; ?>">Upcoming</a>
             </div>
 
             <div class="relative dropdown">
-                <button class="focus:outline-none">
+                <button id="profile-dropdown-toggle" class="focus:outline-none">
                     <img src="profile.jpg" alt="Profile" class="h-8 w-8 rounded-full border-2 border-gray-800 cursor-pointer" />
                 </button>
-                <div class="dropdown-content absolute right-0 mt-2 hidden bg-gray-800 rounded-md shadow-lg w-48">
+                <div id="dropdown-content" class="absolute right-0 mt-2 hidden bg-gray-800 rounded-md shadow-lg w-48">
                     <a href="./profile.php" class="block text-lg px-6 py-2 text-gray-300 hover:bg-gray-700 rounded-md">Your Profile</a>
                     <a href="./logout.php" class="block text-lg px-6 py-2 text-gray-300 hover:bg-gray-700 rounded-md">Sign Out</a>
                 </div>
@@ -167,15 +134,30 @@
             <p id="task-status" class="text-lg mb-4"></p>
 
             <div class="mt-4">
-                <button id="mark-complete" onclick="markTaskComplete(currentTaskId)" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Mark Complete</button>
-                <button id="mark-uncomplete" onclick="markTaskUncomplete(currentTaskId)" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" style="display: none;">Mark Uncomplete</button>
+                <button id="mark-complete" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" onclick="toggleTaskComplete()">Mark Complete</button>
             </div>
         </div>
     </div>
 
-
     <script>
+        document.getElementById('profile-dropdown-toggle').addEventListener('click', function() {
+            const dropdownContent = document.getElementById('dropdown-content');
+            dropdownContent.classList.toggle('hidden'); // Toggle visibility
+        });
+
+        // Function to hide dropdown if clicked outside
+        window.addEventListener('click', function(event) {
+            const dropdownContent = document.getElementById('dropdown-content');
+            const profileButton = document.getElementById('profile-dropdown-toggle');
+
+            // Check if the click was outside the dropdown and the button
+            if (!dropdownContent.contains(event.target) && !profileButton.contains(event.target)) {
+                dropdownContent.classList.add('hidden'); // Hide dropdown
+            }
+        });
+
         let currentTaskId = null; // Store the currently viewed task ID
+        let currentTaskStatus = "Uncompleted"; // Default status
 
         // Debouncing function to limit how often we make requests
         function debounce(func, wait) {
@@ -212,106 +194,50 @@
                                 const taskLink = document.createElement('a');
                                 taskLink.href = '#'; // Prevent default navigation
                                 taskLink.innerHTML = `<strong>${task.task_name}</strong> <br> <small>${task.due_date}</small>`; // Display task name and due date
-                                taskLink.classList.add('block', 'hover:bg-gray-200', 'p-2'); // Add classes for styling
-                                taskLink.dataset.taskId = task.id; // Store task ID in data attribute
+                                taskLink.classList.add('text-gray-800', 'block', 'px-4', 'py-2');
+                                taskLink.onclick = function() {
+                                    // Open the modal and populate it with task details
+                                    currentTaskId = task.id;
+                                    currentTaskStatus = task.status || "Uncompleted"; // Set current task status, default to "Uncompleted" if undefined
+                                    document.getElementById('task-title').innerText = task.task_name;
+                                    document.getElementById('task-notes').innerText = task.notes;
+                                    document.getElementById('task-due-date').innerText = `Due: ${task.due_date}`;
+                                    document.getElementById('task-status').innerText = `Status: ${currentTaskStatus}`; // Display status
+                                    document.getElementById('mark-complete').innerText = (currentTaskStatus === "Uncompleted") ? "Mark Complete" : "Mark Uncomplete"; // Set button text based on status
+                                    document.getElementById('taskModal').style.display = 'block'; // Show modal
+                                };
                                 searchResults.appendChild(taskLink);
                             });
-                            searchResults.style.display = 'block';
+                            searchResults.style.display = 'block'; // Show search results
                         } else {
-                            searchResults.innerHTML = '<p class="text-center text-gray-600">No tasks found</p>';
+                            searchResults.style.display = 'none'; // Hide if no results
                         }
                     }
                 };
 
-                xhr.send('query=' + encodeURIComponent(query));
+                xhr.send(`query=${encodeURIComponent(query)}`);
             } else {
-                searchResults.innerHTML = '';
-                searchResults.style.display = 'none';
+                searchResults.style.display = 'none'; // Hide if query is empty
             }
         }, 300));
 
-        // Handle task click to open modal
-        searchResults.addEventListener('click', function(e) {
-            if (e.target.tagName === 'A') {
-                e.preventDefault(); // Prevent default action
-                const taskId = e.target.dataset.taskId; // Get task ID from data attribute
-                fetchTaskDetails(taskId); // Fetch task details
-            }
-        });
-
-        // Fetch task details and display in modal
-        function fetchTaskDetails(taskId) {
-            currentTaskId = taskId; // Store the current task ID
-            const xhr = new XMLHttpRequest();
-            xhr.open('GET', `get_task.php?task_id=${taskId}`, true);
-
-            xhr.onload = function() {
-                if (this.status === 200) {
-                    const task = JSON.parse(this.responseText);
-                    document.getElementById('task-title').textContent = task.task_name;
-                    document.getElementById('task-notes').textContent = task.notes || 'No notes available';
-                    document.getElementById('task-due-date').textContent = 'Due Date: ' + (task.due_date ? task.due_date : 'No due date');
-                    const taskStatus = task.is_completed ? 'Completed' : 'Not Completed';
-                    document.getElementById('task-status').textContent = 'Status: ' + taskStatus;
-
-                    // Update button visibility based on task status
-                    document.getElementById('mark-complete').style.display = task.is_completed ? 'none' : 'inline-block';
-                    document.getElementById('mark-uncomplete').style.display = task.is_completed ? 'inline-block' : 'none';
-
-                    // Display modal
-                    document.getElementById('taskModal').style.display = 'block';
-                }
-            };
-
-            xhr.send();
-        }
-
-        function markTaskComplete(taskId) {
-            fetch(`mark_complete.php?task_id=${taskId}`, { method: 'POST' })
-                .then(() => {
-                    // Update the task status in the modal immediately
-                    updateTaskStatusInModal('Completed', false);
-                });
-        }
-
-        function markTaskUncomplete(taskId) {
-            fetch(`mark_uncomplete.php?task_id=${taskId}`, { method: 'POST' })
-                .then(() => {
-                    // Update the task status in the modal immediately
-                    updateTaskStatusInModal('Not Completed', true);
-                });
-        }
-
-        // Function to update task status in the modal
-        function updateTaskStatusInModal(status, isUncomplete) {
-            document.getElementById('task-status').textContent = 'Status: ' + status;
-            document.getElementById('mark-complete').style.display = isUncomplete ? 'inline-block' : 'none';
-            document.getElementById('mark-uncomplete').style.display = isUncomplete ? 'none' : 'inline-block';
-        }
-
-
-        // Close modal
+        // Close modal on close button click
         document.querySelector('.close').onclick = function() {
             document.getElementById('taskModal').style.display = 'none';
         };
 
         // Close modal when clicking outside
         window.onclick = function(event) {
-            const modal = document.getElementById('taskModal');
-            if (event.target == modal) {
-                modal.style.display = 'none';
+            if (event.target == document.getElementById('taskModal')) {
+                document.getElementById('taskModal').style.display = 'none';
             }
         };
 
-        function updateTaskStatusInModal(taskId, isCompleted) {
-            const checkbox = document.getElementById(`checkbox-${taskId}`);
-            if (checkbox) {
-                checkbox.checked = isCompleted;
-                const label = document.querySelector(`label[for="checkbox-${taskId}"]`);
-                if (label) {
-                    label.classList.toggle('line-through', isCompleted); // Toggle line-through effect
-                }
-            }
+        // Toggle task completion function
+        function toggleTaskComplete() {
+            currentTaskStatus = (currentTaskStatus === "Uncompleted") ? "Completed" : "Uncompleted"; // Update status
+            document.getElementById('mark-complete').innerText = (currentTaskStatus === "Uncompleted") ? "Mark Complete" : "Mark Uncomplete"; // Change button text
+            document.getElementById('task-status').innerText = `Status: ${currentTaskStatus}`; // Update the displayed status
         }
     </script>
 </body>
