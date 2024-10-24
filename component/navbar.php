@@ -78,6 +78,30 @@
             background-color: #f3f4f6;
         }
 
+        #search-results-mobile {
+            display: none;
+            position: absolute;
+            background-color: white;
+            border-radius: 0.5rem;
+            margin-top: 2.5rem;
+            max-height: 200px;
+            overflow-y: auto;
+            width: 100%;
+            z-index: 50;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #search-results-mobile a {
+            display: block;
+            padding: 0.5rem;
+            color: black;
+            text-decoration: none;
+        }
+
+        #search-results-mobile a:hover {
+            background-color: #f3f4f6;
+        }
+
         /* Modal Styles */
         .modal {
             display: none;
@@ -315,7 +339,9 @@
 
         // AJAX Search (updated to include task completion status)
         const searchBar = document.getElementById('search-bar');
+        const searchBar = document.getElementById('search-bar-mobile');
         const searchResults = document.getElementById('search-results');
+        const searchResultsMobile = document.getElementById('search-results-mobile');
 
         searchBar.addEventListener('input', debounce(function () {
             const query = searchBar.value.trim();
@@ -329,6 +355,7 @@
                     if (this.status === 200) {
                         const results = JSON.parse(this.responseText);
                         searchResults.innerHTML = '';
+                        searchResultsMobile.innerHTML = '';
 
                         if (results.length > 0) {
                             results.forEach(function (task) {
@@ -348,10 +375,13 @@
                                     document.getElementById('taskModal').style.display = 'block';
                                 };
                                 searchResults.appendChild(taskLink);
+                                searchResultsMobile.appendChild(taskLink);
                             });
                             searchResults.style.display = 'block';
+                            searchResultsMobile.style.display = 'block';
                         } else {
                             searchResults.style.display = 'none';
+                            searchResultsMobile.style.display = 'none';
                         }
                     }
                 };
@@ -359,6 +389,7 @@
                 xhr.send(`query=${encodeURIComponent(query)}`);
             } else {
                 searchResults.style.display = 'none';
+                searchResultsMobile.style.display = 'none';
             }
         }, 300));
 
