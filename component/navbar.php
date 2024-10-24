@@ -28,12 +28,12 @@
 
         #mobileMenu {
             position: absolute;
-            top: 0;
+            top: 60px;
             right: 0;
             left: 0;
             z-index: 49;
             background-color: white;
-            padding-top: 77px;
+            padding-top: 0;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease;
         }
