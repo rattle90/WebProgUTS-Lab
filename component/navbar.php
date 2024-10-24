@@ -78,7 +78,6 @@
             background-color: #f3f4f6;
         }
 
-        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -115,7 +114,6 @@
             cursor: pointer;
         }
 
-
         .logo {
             display: flex;
             align-items: center;
@@ -123,22 +121,15 @@
 
         .logo-text {
             font-size: 1.5rem;
-            /* Ukuran font */
             font-weight: 700;
-            /* Berat font */
             color: white;
-            /* Warna teks */
             text-decoration: none;
-            /* Menghilangkan garis bawah */
             margin-left: 8px;
-            /* Spasi antara logo dan teks */
             transition: color 0.3s;
-            /* Transisi warna */
         }
 
         .logo-text:hover {
             color: #3b82f6;
-            /* Warna saat hover */
         }
     </style>
 </head>
@@ -196,7 +187,6 @@
                 </a>
             </div>
 
-            <!-- Profile di kanan -->
             <div class="relative dropdown pr-2">
                 <button id="profile-dropdown-toggle" class="focus:outline-none">
                     <img src="assets/profile.png" alt="Profile"
@@ -222,45 +212,25 @@
                         <path fill-rule="evenodd"
                             d="M12.9 14.32a8 8 0 111.4-1.4l4.28 4.3a1 1 0 01-1.42 1.4l-4.26-4.3zm-5.4-3.32a6 6 0 1112 0 6 6 0 01-12 0z"
                             clip-rule="evenodd" />
-                    </svg>
                 </span>
                 <div id="search-results-mobile"></div>
             </div>
         </div>
 
-    </nav>
-
-
-    <!-- Modal Structure -->
-    <div id="taskModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2 id="task-title" class="text-lg font-semibold"></h2>
-            <p id="task-notes" class="text-lg mb-4"></p>
-            <p id="task-due-date" class="text-lg mb-4"></p>
-            <p id="task-status" class="text-lg mb-4"></p>
-
-            <div class="mt-4">
-                <button id="mark-complete" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                    onclick="toggleTaskComplete()">Mark Complete</button>
-            </div>
+        <div id="mobileMenu" class="hidden flex-col justify-center items-center">
+            <a href="./index.php"
+                class="block text-black text-lg px-4 py-2 hover:bg-gray-700 hover:text-white <?php echo (basename($_SERVER['PHP_SELF']) == 'index.php') ? 'active' : ''; ?>">My
+                Dashboard</a>
+            <a href="./alltask.php"
+                class="block text-black text-lg px-4 py-2 hover:bg-gray-700 hover:text-white <?php echo (basename($_SERVER['PHP_SELF']) == 'alltask.php') ? 'active' : ''; ?>">All
+                Task</a>
+            <a href="./next7days.php"
+                class="block text-black text-lg px-4 py-2 hover:bg-gray-700 hover:text-white <?php echo (basename($_SERVER['PHP_SELF']) == 'next7days.php') ? 'active' : ''; ?>">Next
+                7 Days</a>
+            <a href="./upcoming.php"
+                class="block text-black text-lg px-4 py-2 hover:bg-gray-700 hover:text-white <?php echo (basename($_SERVER['PHP_SELF']) == 'upcoming.php') ? 'active' : ''; ?>">Upcoming</a>
         </div>
-    </div>
-
-    <div id="mobileMenu" class="hidden lg:hidden flex flex-col space-y-4 bg-white p-4 shadow-lg">
-        <a href="./index.php"
-            class="text-black <?php echo (basename($_SERVER['PHP_SELF']) == 'index.php') ? 'active' : ''; ?>">My
-            Dashboard</a>
-        <a href="./alltask.php"
-            class="text-black <?php echo (basename($_SERVER['PHP_SELF']) == 'alltask.php') ? 'active' : ''; ?>">All
-            Task</a>
-        <a href="./next7days.php"
-            class="text-black <?php echo (basename($_SERVER['PHP_SELF']) == 'next7days.php') ? 'active' : ''; ?>">Next
-            7 Days</a>
-        <a href="./upcoming.php"
-            class="text-black <?php echo (basename($_SERVER['PHP_SELF']) == 'upcoming.php') ? 'active' : ''; ?>">Upcoming</a>
-    </div>
-
+    </nav>
 
     <script>
         document.getElementById('profile-dropdown-toggle').addEventListener('click', function () {
@@ -268,33 +238,23 @@
             dropdownContent.classList.toggle('hidden'); // Toggle visibility
         });
 
-        // Function to hide dropdown if clicked outside
         window.addEventListener('click', function (event) {
             const dropdownContent = document.getElementById('dropdown-content');
             const profileButton = document.getElementById('profile-dropdown-toggle');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const burgerMenuButton = document.getElementById('burgerMenu');
 
-            // Check if the click was outside the dropdown and the button
             if (!dropdownContent.contains(event.target) && !profileButton.contains(event.target)) {
                 dropdownContent.classList.add('hidden'); // Hide dropdown
             }
+
+            if (!mobileMenu.contains(event.target) && !burgerMenuButton.contains(event.target)) {
+                mobileMenu.classList.add('hidden'); // Hide mobile menu
+            }
         });
 
-        let currentTaskId = null; // Store the currently viewed task ID
-
-        // Debouncing function to limit how often we make requests
-        function debounce(func, wait) {
-            let timeout;
-            return function (...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func.apply(this, args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
-
-        document.getElementById('burgerMenu').addEventListener('click', function () {
+        document.getElementById('burgerMenu').addEventListener('click', function (event) {
+            event.stopPropagation(); // Prevents the window click from triggering immediately
             const mobileMenu = document.getElementById('mobileMenu');
             mobileMenu.classList.toggle('hidden');
         });
@@ -312,85 +272,6 @@
 
             lastScrollTop = scrollTop;
         });
-
-        // AJAX Search (updated to include task completion status)
-        const searchBar = document.getElementById('search-bar');
-        const searchResults = document.getElementById('search-results');
-
-        searchBar.addEventListener('input', debounce(function () {
-            const query = searchBar.value.trim();
-
-            if (query.length > 0) {
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', './search_tasks.php', true);
-                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-
-                xhr.onload = function () {
-                    if (this.status === 200) {
-                        const results = JSON.parse(this.responseText);
-                        searchResults.innerHTML = '';
-
-                        if (results.length > 0) {
-                            results.forEach(function (task) {
-                                const taskLink = document.createElement('a');
-                                taskLink.href = '#'; // Prevent default navigation
-                                taskLink.innerHTML = `<strong>${task.task_name}</strong> <br> <small>${task.due_date}</small>`;
-                                taskLink.classList.add('text-gray-800', 'block', 'px-4', 'py-2');
-                                taskLink.onclick = function () {
-                                    // Populate modal with task details
-                                    currentTaskId = task.id;
-                                    currentTaskStatus = task.is_completed == 1 ? "Completed" : "Uncompleted";
-                                    document.getElementById('task-title').innerText = task.task_name;
-                                    document.getElementById('task-notes').innerText = task.notes || "No notes provided.";
-                                    document.getElementById('task-due-date').innerText = `Due: ${task.due_date}`;
-                                    document.getElementById('task-status').innerText = `Status: ${currentTaskStatus}`;
-                                    document.getElementById('mark-complete').innerText = currentTaskStatus === "Uncompleted" ? "Mark Complete" : "Mark Uncomplete";
-                                    document.getElementById('taskModal').style.display = 'block';
-                                };
-                                searchResults.appendChild(taskLink);
-                            });
-                            searchResults.style.display = 'block';
-                        } else {
-                            searchResults.style.display = 'none';
-                        }
-                    }
-                };
-
-                xhr.send(`query=${encodeURIComponent(query)}`);
-            } else {
-                searchResults.style.display = 'none';
-            }
-        }, 300));
-
-        document.querySelector('.close').onclick = function () {
-            document.getElementById('taskModal').style.display = 'none';
-        };
-
-        // Close modal when clicking outside
-        window.onclick = function (event) {
-            if (event.target == document.getElementById('taskModal')) {
-                document.getElementById('taskModal').style.display = 'none';
-            }
-        };
-
-        function toggleTaskComplete() {
-            const xhr = new XMLHttpRequest();
-            const url = currentTaskStatus === "Uncompleted" ? './mark_complete.php' : './mark_uncomplete.php';
-            xhr.open('POST', url + `?task_id=${currentTaskId}`, true);
-
-            xhr.onload = function () {
-                if (this.status === 200) {
-                    const response = JSON.parse(this.responseText);
-                    if (response.success) {
-                        currentTaskStatus = currentTaskStatus === "Uncompleted" ? "Completed" : "Uncompleted";
-                        document.getElementById('mark-complete').innerText = currentTaskStatus === "Uncompleted" ? "Mark Complete" : "Mark Uncomplete";
-                        document.getElementById('task-status').innerText = `Status: ${currentTaskStatus}`;
-                    }
-                }
-            };
-
-            xhr.send();
-        }
     </script>
 </body>
 
