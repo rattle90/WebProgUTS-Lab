@@ -94,10 +94,11 @@ switch ($filter) {
         body { font-family: 'Poppins', sans-serif; }
     </style>
 </head>
-<body class="bg-blue-600 pt-20 h-screen">
-    <div class="flex h-full w-11/12 space-x-6 mx-auto py-10">
+<body class="bg-blue-600 pt-20 min-h-screen flex flex-col">
+    <div class="flex flex-col md:flex-row h-full w-11/12 space-y-6 md:space-x-6 mx-auto py-10">
 
-        <div class="w-1/3 bg-gray-900 text-white p-4 rounded-lg shadow-lg flex flex-col">
+        <!-- Bagian kiri: Daftar task -->
+        <div class="w-full md:w-1/3 bg-gray-900 text-white p-4 rounded-lg shadow-lg flex flex-col">
             <div class="flex justify-between mb-4">
                 <h1 class="text-xl font-semibold">All my tasks</h1>
                 <select id="task-filter" class="bg-gray-800 text-white rounded-lg p-2" onchange="filterTasks()">
@@ -106,8 +107,8 @@ switch ($filter) {
                     <option value="tomorrow" <?= $filter == 'tomorrow' ? 'selected' : '' ?>>Tomorrow</option>
                     <option value="this_week" <?= $filter == 'this_week' ? 'selected' : '' ?>>This Week</option>
                     <option value="later" <?= $filter == 'later' ? 'selected' : '' ?>>Later</option>
-                    <option value="completed" <?= $filter == 'completed' ? 'selected' : '' ?>>Completed</option> <!-- New -->
-                    <option value="uncompleted" <?= $filter == 'uncompleted' ? 'selected' : '' ?>>Uncompleted</option> <!-- New -->
+                    <option value="completed" <?= $filter == 'completed' ? 'selected' : '' ?>>Completed</option>
+                    <option value="uncompleted" <?= $filter == 'uncompleted' ? 'selected' : '' ?>>Uncompleted</option>
                 </select>
             </div>
             <ul class="space-y-3 flex-1 overflow-y-auto" id="task-list">
@@ -137,7 +138,8 @@ switch ($filter) {
             <button class="mt-4 p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg" id="add-task-btn">+ Add task</button>
         </div>
 
-        <div class="w-2/3 bg-gray-100 p-6 rounded-lg shadow-lg" id="task-details">
+        <!-- Bagian kanan: Detail task -->
+        <div class="w-full md:w-2/3 bg-gray-100 p-6 rounded-lg shadow-lg" id="task-details">
             <div class="flex justify-between">
                 <h2 class="text-2xl font-semibold">Task Details</h2>
             </div>
@@ -147,8 +149,9 @@ switch ($filter) {
         </div>
     </div>
 
+    <!-- Modal untuk Add Task -->
     <div id="add-task-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-        <div class="bg-white p-4 rounded-lg shadow-lg w-1/3 relative" id="modal-content">
+        <div class="bg-white p-4 rounded-lg shadow-lg w-full md:w-1/3 relative" id="modal-content">
             <h2 class="text-xl font-semibold mb-4">Add New Task</h2>
             <form id="add-task-form">
                 <input type="text" name="task_name" placeholder="Task Name" class="p-2 border rounded-md w-full mb-3" required>
