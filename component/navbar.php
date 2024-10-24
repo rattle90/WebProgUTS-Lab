@@ -59,7 +59,7 @@
             position: absolute;
             background-color: white;
             border-radius: 0.5rem;
-            margin-top: 0.5rem;
+            margin-top: 2.5rem;
             max-height: 200px;
             overflow-y: auto;
             width: 100%;
