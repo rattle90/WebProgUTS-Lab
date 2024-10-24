@@ -193,6 +193,10 @@
             display: none;  /* Sembunyikan hasil pencarian untuk mobile saat di desktop */
         }
     }
+
+    #dropdown-content {
+            z-index: 100; /* Higher z-index to stay on top */
+        }
     </style>
 </head>
 
