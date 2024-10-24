@@ -83,6 +83,24 @@
             text-decoration: none;
             cursor: pointer;
         }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-text {
+            font-size: 1.5rem; /* Ukuran font */
+            font-weight: 700; /* Berat font */
+            color: white; /* Warna teks */
+            text-decoration: none; /* Menghilangkan garis bawah */
+            margin-left: 8px; /* Spasi antara logo dan teks */
+            transition: color 0.3s; /* Transisi warna */
+        }
+
+        .logo-text:hover {
+            color: #3b82f6; /* Warna saat hover */
+        }
     </style>
 </head>
 <body>
@@ -101,9 +119,9 @@
 
         <div class="flex items-center justify-between">
             <div class="flex items-center">
-                <a href="">
-                    <img src="logo.png" alt="Logo" class="h-8 w-8" />
-                </a>
+                <span class="logo">
+                    <span class="logo-text">Mengnugas</span>
+                </span>
             </div>
 
             <div class="flex-grow flex justify-center space-x-2">
@@ -115,7 +133,7 @@
 
             <div class="relative dropdown">
                 <button id="profile-dropdown-toggle" class="focus:outline-none">
-                    <img src="profile.jpg" alt="Profile" class="h-8 w-8 rounded-full border-2 border-gray-800 cursor-pointer" />
+                    <img src="assets/profile.png" alt="Profile" class="h-8 w-8 rounded-full border-2 border-gray-800 cursor-pointer" />
                 </button>
                 <div id="dropdown-content" class="absolute right-0 mt-2 hidden bg-gray-800 rounded-md shadow-lg w-48">
                     <a href="./profile.php" class="block text-lg px-6 py-2 text-gray-300 hover:bg-gray-700 rounded-md">Your Profile</a>
