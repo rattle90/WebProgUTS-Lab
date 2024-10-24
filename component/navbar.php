@@ -78,30 +78,6 @@
             background-color: #f3f4f6;
         }
 
-        #search-results-mobile {
-            display: none;
-            position: absolute;
-            background-color: white;
-            border-radius: 0.5rem;
-            margin-top: 2.5rem;
-            max-height: 200px;
-            overflow-y: auto;
-            width: 100%;
-            z-index: 50;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        #search-results-mobile a {
-            display: block;
-            padding: 0.5rem;
-            color: black;
-            text-decoration: none;
-        }
-
-        #search-results-mobile a:hover {
-            background-color: #f3f4f6;
-        }
-
         /* Modal Styles */
         .modal {
             display: none;
@@ -164,6 +140,59 @@
             color: #3b82f6;
             /* Warna saat hover */
         }
+
+        @media (max-width: 768px) {
+        /* Lebar input dan hasil search menyesuaikan ukuran layar mobile */
+        #search-bar-mobile {
+            width: 100%;  /* Mengisi seluruh lebar layar */
+            padding-left: 40px;
+        }
+
+        #search-results-mobile {
+            width: 100%;  /* Lebar 100% untuk menyesuaikan layar */
+            max-height: 200px;  /* Batas tinggi maksimal */
+            overflow-y: auto;  /* Menambahkan scroll jika terlalu banyak hasil */
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: absolute;
+            z-index: 50;
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        #search-results-mobile a {
+            display: block;
+            padding: 0.5rem;
+            color: black;
+            text-decoration: none;
+        }
+
+        #search-results-mobile a:hover {
+            background-color: #f3f4f6;
+        }
+
+        /* Navbar style khusus untuk mobile */
+        .navbar {
+            padding: 1rem;
+            position: fixed;
+            width: 100%;
+        }
+
+        #mobileMenu {
+            padding-top: 77px;
+        }
+    }
+
+    /* Style default untuk desktop */
+    @media (min-width: 769px) {
+        #search-bar-mobile {
+            display: none;  /* Sembunyikan input pencarian untuk mobile saat di desktop */
+        }
+
+        #search-results-mobile {
+            display: none;  /* Sembunyikan hasil pencarian untuk mobile saat di desktop */
+        }
+    }
     </style>
 </head>
 
@@ -339,8 +368,8 @@
 
         // AJAX Search (updated to include task completion status)
         const searchBar = document.getElementById('search-bar');
-        const searchBar = document.getElementById('search-bar-mobile');
         const searchResults = document.getElementById('search-results');
+        const searchBarMobile = document.getElementById('search-bar-mobile');
         const searchResultsMobile = document.getElementById('search-results-mobile');
 
         searchBar.addEventListener('input', debounce(function () {
@@ -355,7 +384,6 @@
                     if (this.status === 200) {
                         const results = JSON.parse(this.responseText);
                         searchResults.innerHTML = '';
-                        searchResultsMobile.innerHTML = '';
 
                         if (results.length > 0) {
                             results.forEach(function (task) {
@@ -375,13 +403,10 @@
                                     document.getElementById('taskModal').style.display = 'block';
                                 };
                                 searchResults.appendChild(taskLink);
-                                searchResultsMobile.appendChild(taskLink);
                             });
                             searchResults.style.display = 'block';
-                            searchResultsMobile.style.display = 'block';
                         } else {
                             searchResults.style.display = 'none';
-                            searchResultsMobile.style.display = 'none';
                         }
                     }
                 };
@@ -389,20 +414,69 @@
                 xhr.send(`query=${encodeURIComponent(query)}`);
             } else {
                 searchResults.style.display = 'none';
+            }
+        }, 300));
+
+        searchBarMobile.addEventListener('input', debounce(function () {
+            const query = searchBarMobile.value.trim();
+
+            if (query.length > 0) {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', './search_tasks.php', true);
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+                xhr.onload = function () {
+                    if (this.status === 200) {
+                        const results = JSON.parse(this.responseText);
+                        searchResultsMobile.innerHTML = '';
+
+                        if (results.length > 0) {
+                            results.forEach(function (task) {
+                                const taskLink = document.createElement('a');
+                                taskLink.href = '#'; // Prevent default navigation
+                                taskLink.innerHTML = `<strong>${task.task_name}</strong> <br> <small>${task.due_date}</small>`;
+                                taskLink.classList.add('text-gray-800', 'block', 'px-4', 'py-2');
+
+                                // Add click event for the mobile results to show the modal
+                                taskLink.onclick = function () {
+                                    // Populate modal with task details
+                                    currentTaskId = task.id;
+                                    currentTaskStatus = task.is_completed == 1 ? "Completed" : "Uncompleted";
+                                    document.getElementById('task-title').innerText = task.task_name;
+                                    document.getElementById('task-notes').innerText = task.notes || "No notes provided.";
+                                    document.getElementById('task-due-date').innerText = `Due: ${task.due_date}`;
+                                    document.getElementById('task-status').innerText = `Status: ${currentTaskStatus}`;
+                                    document.getElementById('mark-complete').innerText = currentTaskStatus === "Uncompleted" ? "Mark Complete" : "Mark Uncomplete";
+                                    document.getElementById('taskModal').style.display = 'block';
+                                };
+                                searchResultsMobile.appendChild(taskLink);
+                            });
+                            searchResultsMobile.style.display = 'block';
+                        } else {
+                            searchResultsMobile.innerHTML = '<p>No results found</p>';
+                            searchResultsMobile.style.display = 'block';
+                        }
+                    }
+                };
+                xhr.send(`query=${query}`);
+            } else {
                 searchResultsMobile.style.display = 'none';
             }
         }, 300));
+
 
         document.querySelector('.close').onclick = function () {
             document.getElementById('taskModal').style.display = 'none';
         };
 
-        // Close modal when clicking outside
+       // Close modal when clicking outside
         window.onclick = function (event) {
-            if (event.target == document.getElementById('taskModal')) {
-                document.getElementById('taskModal').style.display = 'none';
+            const modal = document.getElementById('taskModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
             }
         };
+
 
         function toggleTaskComplete() {
             const xhr = new XMLHttpRequest();
