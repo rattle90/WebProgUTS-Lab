@@ -62,13 +62,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-weight: bold;
             margin-left: 10px;
         }
+        @media (max-width: 1024px) {
+            /* Atur bubble untuk muncul ke bawah di mobile/tablet */
+            .task-bubble {
+                width: 100%;
+                max-width: none;
+                margin-bottom: 1rem;
+            }
+        }
     </style>
 </head>
 <body class="bg-blue-600 h-screen p-5 pt-24">
 
     <div class="container mx-auto mt-5">
         <h1 class="text-white text-3xl font-bold mb-6">Tasks for the Next 7 Days</h1>
-        <div class="flex space-x-4 overflow-x-auto">
+        <!-- Flex berubah dari row (default) menjadi column di layar kecil -->
+        <div class="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4 overflow-x-auto lg:overflow-x-visible">
             <?php
             for ($i = 0; $i < 7; $i++) {
                 $date = clone $today;
@@ -77,7 +86,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $dayName = $date->format('l');
                 $formattedDate = $date->format('Y-m-d');
 
-                echo '<div class="bg-white p-4 rounded-lg shadow-md w-64 flex-none max-h-72 overflow-y-auto">';
+                // Tambahkan class task-bubble untuk styling responsif
+                echo '<div class="task-bubble bg-white p-4 rounded-lg shadow-md lg:w-64 flex-none max-h-72 overflow-y-auto">';
                 echo "<h2 class='text-lg font-semibold text-gray-800'>$dayName"; 
                 if ($formattedDate === $todayFormatted) {
                     echo "<span class='today-label'> Today</span>";
@@ -110,7 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <!-- Modal -->
     <div id="add-task-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-        <div class="bg-white p-6 rounded-lg shadow-lg w-2/3 relative" id="modal-content">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-11/12 md:w-2/3 relative" id="modal-content">
             <form id="add-task-form">
                 <div class="mb-4">
                     <input type="text" name="task_name" placeholder="Task name" class="p-2 text-lg font-semibold border-b w-full focus:outline-none mb-2" required>
@@ -124,7 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </form>
         </div>
     </div>
-
+    
     <script>
         document.querySelectorAll('[id^="add-task-btn-"]').forEach(button => {
             button.addEventListener('click', function () {
