@@ -1,4 +1,5 @@
 <?php
+ob_start();
 session_start();
 include 'db.php'; // Koneksi database
 include 'component/navbar.php';
@@ -269,15 +270,55 @@ switch ($filter) {
         }
         
         document.querySelectorAll('.task-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', (e) => {
-                const taskId = e.target.dataset.taskId;
-                if (e.target.checked) {
-                    markTaskComplete(taskId);
+    checkbox.addEventListener('change', function (e) {
+        e.stopPropagation();  // Hindari konflik dengan event lain
+        const taskId = this.getAttribute('data-task-id');
+        const label = document.querySelector(`label[for="checkbox-${taskId}"]`);
+
+        // Update tampilan garis coret berdasarkan status checkbox
+        if (this.checked) {
+            label.classList.add('line-through', 'text-gray-400');
+        } else {
+            label.classList.remove('line-through', 'text-gray-400');
+        }
+
+        // Kirim request ke server untuk update status di database
+        const url = this.checked 
+            ? `mark_complete.php?task_id=${taskId}` 
+            : `mark_uncomplete.php?task_id=${taskId}`;
+
+        fetch(url, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    Swal.fire('Error', 'Failed to update task status.', 'error');
+
+                    // Kembalikan status checkbox jika update gagal
+                    this.checked = !this.checked;
+                    if (this.checked) {
+                        label.classList.add('line-through', 'text-gray-400');
+                    } else {
+                        label.classList.remove('line-through', 'text-gray-400');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire('Error', 'Failed to update task status. Try again.', 'error');
+
+                // Kembalikan status jika terjadi error
+                this.checked = !this.checked;
+                if (this.checked) {
+                    label.classList.add('line-through', 'text-gray-400');
                 } else {
-                    markTaskUncomplete(taskId);
+                    label.classList.remove('line-through', 'text-gray-400');
                 }
             });
-        });
+    });
+});
+
+
+
     </script>
 </body>
 </html>

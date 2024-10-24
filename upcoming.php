@@ -1,11 +1,13 @@
 <?php
+ob_start();
 session_start(); // Mulai session
 include 'db.php';
 include 'component/navbar.php';
 
 // Pastikan pengguna telah login dan ID pengguna ada di session
 if (!isset($_SESSION['user_id'])) {
-    die("You need to log in to access this page."); // Pesan jika belum login
+    header('Location: login.php');
+    exit();
 }
 
 $userId = $_SESSION['user_id']; // Ambil ID pengguna dari session
