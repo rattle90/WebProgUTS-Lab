@@ -14,12 +14,13 @@
         }
 
         .navbar {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 50;
-            transition: transform 0.3s ease;
+            padding: 0;
+            margin: 0;
         }
 
         .navbar-hidden {
@@ -177,9 +178,14 @@
             position: fixed;
             width: 100%;
         }
+        
+        .flex {
+            margin: 0;
+            padding: 0;
+        }
 
         #mobileMenu {
-            padding-top: 77px;
+            padding-top: 10px;
         }
     }
 
