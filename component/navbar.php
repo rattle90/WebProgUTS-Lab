@@ -171,14 +171,12 @@
                 </button>
             </div>
 
-            <!-- Logo Mengnugas di kiri -->
             <div class="flex items-center">
                 <span class="logo">
                     <span class="logo-text">Mengnugas</span>
                 </span>
             </div>
 
-            <!-- Menu items di tengah -->
             <div id="menuItems" class="hidden lg:flex items-center justify-center space-x-2">
                 <a href="./index.php"
                     class="nav-link text-gray-400 font-medium text-lg flex items-center hover:text-white active:text-white <?php echo (basename($_SERVER['PHP_SELF']) == 'index.php') ? 'active' : ''; ?>">
@@ -215,7 +213,23 @@
             </div>
         </div>
 
+        <div class="flex justify-center lg:hidden mt-2 pb-2">
+            <div class="relative w-60 px-4">
+                <input id="search-bar-mobile" type="text" placeholder="Search tasks..."
+                    class="bg-gray-800 text-gray-400 px-4 py-1 rounded-full w-full pl-10" />
+                <span class="absolute inset-y-0 left-8 flex items-center text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M12.9 14.32a8 8 0 111.4-1.4l4.28 4.3a1 1 0 01-1.42 1.4l-4.26-4.3zm-5.4-3.32a6 6 0 1112 0 6 6 0 01-12 0z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </span>
+                <div id="search-results-mobile"></div>
+            </div>
+        </div>
+
     </nav>
+
 
     <!-- Modal Structure -->
     <div id="taskModal" class="modal">

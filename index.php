@@ -78,7 +78,7 @@ $groupedTasks = groupTasksByDueDate($tasks);
 
 <body class="bg-gray-100 pt-28">
 
-    <div class="container mx-auto px-4">
+    <div class="container mx-auto pt-2 px-4">
         <div class="max-w-screen">
             <h1 class="text-xl lg:text-3xl font-semibold text-gray-800 mb-2"><span class="auto-type"> </span></h1>
             <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
@@ -178,7 +178,7 @@ $groupedTasks = groupTasksByDueDate($tasks);
 
     <!-- Modal Popup -->
     <div id="task-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-        <div class="bg-white p-6 rounded-lg shadow-lg w-1/3">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-70 lg:w-1/3">
             <h2 class="text-xl font-semibold mb-4">Task Details</h2>
             <div id="task-content">
                 <p>Select a task to view details.</p>

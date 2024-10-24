@@ -86,8 +86,8 @@ for ($i = 0; $i <= 6; $i++) { // Show current month and 6 months ahead
 </head>
 
 <body class="bg-white h-screen">
-    <div class="main-content max-w-64 lg:max-w-4xl mx-auto py-10">
-        <div class="mb-6 flex flex-col lg:flex-row justify-between lg:items-center">
+    <div class="main-content max-w-80 lg:max-w-4xl mx-auto pt-20 lg:py-10">
+        <div class="mb-6 flex flex-col lg:flex-row justify-between pt-6 lg:items-center">
             <h1 class="text-2xl font-black pb-6 lg:pb-0">Upcoming Tasks</h1>
             <form action="" method="GET">
                 <label for="month" class="text-md lg:text-lg font-semibold lg:font-bold">Select Month: </label>
