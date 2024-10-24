@@ -160,49 +160,61 @@
             </div>
         </div>
 
-        <div class="lg:hidden">
-            <button id="burgerMenu" class="text-white">
-                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-            </button>
-        </div>
+        <div class="flex justify-between items-center">
+            <div class="lg:hidden">
+                <button id="burgerMenu" class="text-white">
+                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+            </div>
 
-        <div id="menuItems" class="hidden lg:flex items-center justify-between">
+            <!-- Logo Mengnugas di kiri -->
             <div class="flex items-center">
                 <span class="logo">
                     <span class="logo-text">Mengnugas</span>
                 </span>
             </div>
 
-            <div class="flex-grow flex justify-center space-x-2">
+            <!-- Menu items di tengah -->
+            <div id="menuItems" class="hidden lg:flex items-center justify-center space-x-2">
                 <a href="./index.php"
-                    class="nav-link text-gray-400 font-medium text-lg flex items-center hover:text-white active:text-white <?php echo (basename($_SERVER['PHP_SELF']) == 'index.php') ? 'active' : ''; ?>">My
-                    Dashboard</a>
+                    class="nav-link text-gray-400 font-medium text-lg flex items-center hover:text-white active:text-white <?php echo (basename($_SERVER['PHP_SELF']) == 'index.php') ? 'active' : ''; ?>">
+                    My Dashboard
+                </a>
                 <a href="./alltask.php"
-                    class="nav-link text-gray-400 font-medium text-lg flex items-center <?php echo (basename($_SERVER['PHP_SELF']) == 'alltask.php') ? 'active' : ''; ?>">All
-                    Task</a>
+                    class="nav-link text-gray-400 font-medium text-lg flex items-center <?php echo (basename($_SERVER['PHP_SELF']) == 'alltask.php') ? 'active' : ''; ?>">
+                    All Task
+                </a>
                 <a href="./next7days.php"
-                    class="nav-link text-gray-400 font-medium text-lg flex items-center <?php echo (basename($_SERVER['PHP_SELF']) == 'next7days.php') ? 'active' : ''; ?>">Next
-                    7 Days</a>
+                    class="nav-link text-gray-400 font-medium text-lg flex items-center <?php echo (basename($_SERVER['PHP_SELF']) == 'next7days.php') ? 'active' : ''; ?>">
+                    Next 7 Days
+                </a>
                 <a href="./upcoming.php"
-                    class="nav-link text-gray-400 font-medium text-lg flex items-center <?php echo (basename($_SERVER['PHP_SELF']) == 'upcoming.php') ? 'active' : ''; ?>">Upcoming</a>
+                    class="nav-link text-gray-400 font-medium text-lg flex items-center <?php echo (basename($_SERVER['PHP_SELF']) == 'upcoming.php') ? 'active' : ''; ?>">
+                    Upcoming
+                </a>
             </div>
 
+            <!-- Profile di kanan -->
             <div class="relative dropdown">
                 <button id="profile-dropdown-toggle" class="focus:outline-none">
                     <img src="assets/profile.png" alt="Profile"
                         class="h-8 w-8 rounded-full border-2 border-gray-800 cursor-pointer" />
                 </button>
                 <div id="dropdown-content" class="absolute right-0 mt-2 hidden bg-gray-800 rounded-md shadow-lg w-48">
-                    <a href="./profile.php"
-                        class="block text-lg px-6 py-2 text-gray-300 hover:bg-gray-700 rounded-md">Your Profile</a>
-                    <a href="./logout.php"
-                        class="block text-lg px-6 py-2 text-gray-300 hover:bg-gray-700 rounded-md">Sign Out</a>
+                    <a href="./profile.php" class="block text-lg px-6 py-2 text-gray-300 hover:bg-gray-700 rounded-md">
+                        Your Profile
+                    </a>
+                    <a href="./logout.php" class="block text-lg px-6 py-2 text-gray-300 hover:bg-gray-700 rounded-md">
+                        Sign Out
+                    </a>
                 </div>
             </div>
         </div>
+
     </nav>
 
     <!-- Modal Structure -->
@@ -287,8 +299,8 @@
             lastScrollTop = scrollTop;
         });
 
-           // AJAX Search (updated to include task completion status)
-           const searchBar = document.getElementById('search-bar');
+        // AJAX Search (updated to include task completion status)
+        const searchBar = document.getElementById('search-bar');
         const searchResults = document.getElementById('search-results');
 
         searchBar.addEventListener('input', debounce(function () {
