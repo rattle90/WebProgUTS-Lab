@@ -131,6 +131,10 @@
         .logo-text:hover {
             color: #3b82f6;
         }
+
+        #dropdown-content {
+            z-index: 100; /* Higher z-index to stay on top */
+        }
     </style>
 </head>
 
