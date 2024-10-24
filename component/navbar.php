@@ -145,11 +145,11 @@
 
 <body>
     <nav class="navbar bg-gray-900 p-2 fixed top-0 left-0 right-0 z-10">
-        <div class="flex justify-between items-center mb-2">
-            <div class="lg:relative w-1/3">
+        <div class="flex justify-center mb-2">
+            <div class="hidden lg:flex lg:flex-row relative w-1/3">
                 <input id="search-bar" type="text" placeholder="Search tasks..."
-                    class="bg-gray-800 text-gray-400 px-2 lg:px-4 py-1 rounded-full w-full lg:pl-10" />
-                <span class="hidden lg:flex flex-col absolute inset-y-0 left-3 flex items-center text-gray-400">
+                    class="bg-gray-800 text-gray-400 px-4 py-1 rounded-full w-full pl-10" />
+                <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd"
                             d="M12.9 14.32a8 8 0 111.4-1.4l4.28 4.3a1 1 0 01-1.42 1.4l-4.26-4.3zm-5.4-3.32a6 6 0 1112 0 6 6 0 01-12 0z"
@@ -158,20 +158,16 @@
                 </span>
                 <div id="search-results"></div>
             </div>
-            <div class="lg:hidden">
-                <button id="burgerMenu" class="text-white flex flex-col">
-                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </button>
-            </div>
         </div>
 
-
-
-
+        <div class="lg:hidden">
+            <button id="burgerMenu" class="text-white">
+                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+        </div>
 
         <div id="menuItems" class="hidden lg:flex items-center justify-between">
             <div class="flex items-center">
@@ -258,7 +254,6 @@
         });
 
         let currentTaskId = null; // Store the currently viewed task ID
-        let currentTaskStatus = "Uncompleted"; // Default status
 
         // Debouncing function to limit how often we make requests
         function debounce(func, wait) {
@@ -292,8 +287,8 @@
             lastScrollTop = scrollTop;
         });
 
-        // AJAX Search
-        const searchBar = document.getElementById('search-bar');
+           // AJAX Search (updated to include task completion status)
+           const searchBar = document.getElementById('search-bar');
         const searchResults = document.getElementById('search-results');
 
         searchBar.addEventListener('input', debounce(function () {
@@ -313,31 +308,31 @@
                             results.forEach(function (task) {
                                 const taskLink = document.createElement('a');
                                 taskLink.href = '#'; // Prevent default navigation
-                                taskLink.innerHTML = `<strong>${task.task_name}</strong> <br> <small>${task.due_date}</small>`; // Display task name and due date
+                                taskLink.innerHTML = `<strong>${task.task_name}</strong> <br> <small>${task.due_date}</small>`;
                                 taskLink.classList.add('text-gray-800', 'block', 'px-4', 'py-2');
                                 taskLink.onclick = function () {
-                                    // Open the modal and populate it with task details
+                                    // Populate modal with task details
                                     currentTaskId = task.id;
-                                    currentTaskStatus = task.status || "Uncompleted"; // Set current task status, default to "Uncompleted" if undefined
+                                    currentTaskStatus = task.is_completed == 1 ? "Completed" : "Uncompleted";
                                     document.getElementById('task-title').innerText = task.task_name;
-                                    document.getElementById('task-notes').innerText = task.notes;
+                                    document.getElementById('task-notes').innerText = task.notes || "No notes provided.";
                                     document.getElementById('task-due-date').innerText = `Due: ${task.due_date}`;
-                                    document.getElementById('task-status').innerText = `Status: ${currentTaskStatus}`; // Display status
-                                    document.getElementById('mark-complete').innerText = (currentTaskStatus === "Uncompleted") ? "Mark Complete" : "Mark Uncomplete"; // Set button text based on status
-                                    document.getElementById('taskModal').style.display = 'block'; // Show modal
+                                    document.getElementById('task-status').innerText = `Status: ${currentTaskStatus}`;
+                                    document.getElementById('mark-complete').innerText = currentTaskStatus === "Uncompleted" ? "Mark Complete" : "Mark Uncomplete";
+                                    document.getElementById('taskModal').style.display = 'block';
                                 };
                                 searchResults.appendChild(taskLink);
                             });
-                            searchResults.style.display = 'block'; // Show search results
+                            searchResults.style.display = 'block';
                         } else {
-                            searchResults.style.display = 'none'; // Hide if no results
+                            searchResults.style.display = 'none';
                         }
                     }
                 };
 
                 xhr.send(`query=${encodeURIComponent(query)}`);
             } else {
-                searchResults.style.display = 'none'; // Hide if query is empty
+                searchResults.style.display = 'none';
             }
         }, 300));
 
@@ -345,6 +340,7 @@
             document.getElementById('taskModal').style.display = 'none';
         };
 
+        // Close modal when clicking outside
         window.onclick = function (event) {
             if (event.target == document.getElementById('taskModal')) {
                 document.getElementById('taskModal').style.display = 'none';
@@ -353,25 +349,16 @@
 
         function toggleTaskComplete() {
             const xhr = new XMLHttpRequest();
-            const url = (currentTaskStatus === "Uncompleted") ? './mark_complete.php' : './mark_uncomplete.php';
+            const url = currentTaskStatus === "Uncompleted" ? './mark_complete.php' : './mark_uncomplete.php';
             xhr.open('POST', url + `?task_id=${currentTaskId}`, true);
 
             xhr.onload = function () {
                 if (this.status === 200) {
                     const response = JSON.parse(this.responseText);
                     if (response.success) {
-                        currentTaskStatus = (currentTaskStatus === "Uncompleted") ? "Completed" : "Uncompleted"; // Update status
-                        document.getElementById('mark-complete').innerText = (currentTaskStatus === "Uncompleted") ? "Mark Complete" : "Mark Uncomplete"; // Change button text
-                        document.getElementById('task-status').innerText = `Status: ${currentTaskStatus}`; // Update the displayed status
-
-                        const taskLink = document.querySelector(`a[data-task-id="${currentTaskId}"]`);
-                        if (taskLink) {
-                            if (currentTaskStatus === "Completed") {
-                                taskLink.classList.add('line-through'); // Tambahkan styling selesai
-                            } else {
-                                taskLink.classList.remove('line-through'); // Hapus styling selesai
-                            }
-                        }
+                        currentTaskStatus = currentTaskStatus === "Uncompleted" ? "Completed" : "Uncompleted";
+                        document.getElementById('mark-complete').innerText = currentTaskStatus === "Uncompleted" ? "Mark Complete" : "Mark Uncomplete";
+                        document.getElementById('task-status').innerText = `Status: ${currentTaskStatus}`;
                     }
                 }
             };
