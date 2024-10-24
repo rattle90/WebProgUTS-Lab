@@ -162,7 +162,7 @@
 
         <div class="flex justify-between items-center">
             <div class="lg:hidden">
-                <button id="burgerMenu" class="text-white">
+                <button id="burgerMenu" class="text-white pl-2">
                     <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -197,7 +197,7 @@
             </div>
 
             <!-- Profile di kanan -->
-            <div class="relative dropdown">
+            <div class="relative dropdown pr-2">
                 <button id="profile-dropdown-toggle" class="focus:outline-none">
                     <img src="assets/profile.png" alt="Profile"
                         class="h-8 w-8 rounded-full border-2 border-gray-800 cursor-pointer" />
