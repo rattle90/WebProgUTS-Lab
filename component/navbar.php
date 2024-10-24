@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +10,37 @@
             background-color: #3b82f6;
             color: white;
             border-radius: 0.5rem;
-            
+
+        }
+
+        .navbar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            transition: transform 0.3s ease;
+        }
+
+        .navbar-hidden {
+            transform: translateY(-100%);
+        }
+
+        #mobileMenu {
+            position: absolute;
+            top: 0;
+            right: 0;
+            left: 0;
+            z-index: 49;
+            background-color: white;
+            padding-top: 77px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        #mobileMenu a {
+            padding: 8px 16px;
+            border-bottom: 0.005px solid black;
         }
 
         .nav-link {
@@ -84,40 +115,61 @@
             cursor: pointer;
         }
 
+
         .logo {
             display: flex;
             align-items: center;
         }
 
         .logo-text {
-            font-size: 1.5rem; /* Ukuran font */
-            font-weight: 700; /* Berat font */
-            color: white; /* Warna teks */
-            text-decoration: none; /* Menghilangkan garis bawah */
-            margin-left: 8px; /* Spasi antara logo dan teks */
-            transition: color 0.3s; /* Transisi warna */
+            font-size: 1.5rem;
+            /* Ukuran font */
+            font-weight: 700;
+            /* Berat font */
+            color: white;
+            /* Warna teks */
+            text-decoration: none;
+            /* Menghilangkan garis bawah */
+            margin-left: 8px;
+            /* Spasi antara logo dan teks */
+            transition: color 0.3s;
+            /* Transisi warna */
         }
 
         .logo-text:hover {
-            color: #3b82f6; /* Warna saat hover */
+            color: #3b82f6;
+            /* Warna saat hover */
         }
     </style>
 </head>
+
 <body>
-    <nav class="bg-gray-900 p-2 fixed top-0 left-0 right-0 z-10">
+    <nav class="navbar bg-gray-900 p-2 fixed top-0 left-0 right-0 z-10">
         <div class="flex justify-center mb-2">
-            <div class="relative w-1/3">
-                <input id="search-bar" type="text" placeholder="Search tasks..." class="bg-gray-800 text-gray-400 px-4 py-1 rounded-full w-full pl-10" />
+            <div class="hidden lg:flex lg:flex-row relative w-1/3">
+                <input id="search-bar" type="text" placeholder="Search tasks..."
+                    class="bg-gray-800 text-gray-400 px-4 py-1 rounded-full w-full pl-10" />
                 <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M12.9 14.32a8 8 0 111.4-1.4l4.28 4.3a1 1 0 01-1.42 1.4l-4.26-4.3zm-5.4-3.32a6 6 0 1112 0 6 6 0 01-12 0z" clip-rule="evenodd" />
+                        <path fill-rule="evenodd"
+                            d="M12.9 14.32a8 8 0 111.4-1.4l4.28 4.3a1 1 0 01-1.42 1.4l-4.26-4.3zm-5.4-3.32a6 6 0 1112 0 6 6 0 01-12 0z"
+                            clip-rule="evenodd" />
                     </svg>
                 </span>
                 <div id="search-results"></div>
             </div>
         </div>
 
-        <div class="flex items-center justify-between">
+        <div class="lg:hidden">
+            <button id="burgerMenu" class="text-white">
+                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+        </div>
+
+        <div id="menuItems" class="hidden lg:flex items-center justify-between">
             <div class="flex items-center">
                 <span class="logo">
                     <span class="logo-text">Mengnugas</span>
@@ -125,19 +177,29 @@
             </div>
 
             <div class="flex-grow flex justify-center space-x-2">
-                <a href="./index.php" class="nav-link text-gray-400 font-medium text-lg flex items-center hover:text-white active:text-white <?php echo (basename($_SERVER['PHP_SELF']) == 'index.php') ? 'active' : ''; ?>">My Dashboard</a>
-                <a href="./alltask.php" class="nav-link text-gray-400 font-medium text-lg flex items-center <?php echo (basename($_SERVER['PHP_SELF']) == 'alltask.php') ? 'active' : ''; ?>">All Task</a>
-                <a href="./next7days.php" class="nav-link text-gray-400 font-medium text-lg flex items-center <?php echo (basename($_SERVER['PHP_SELF']) == 'next7days.php') ? 'active' : ''; ?>">Next 7 Days</a>
-                <a href="./upcoming.php" class="nav-link text-gray-400 font-medium text-lg flex items-center <?php echo (basename($_SERVER['PHP_SELF']) == 'upcoming.php') ? 'active' : ''; ?>">Upcoming</a>
+                <a href="./index.php"
+                    class="nav-link text-gray-400 font-medium text-lg flex items-center hover:text-white active:text-white <?php echo (basename($_SERVER['PHP_SELF']) == 'index.php') ? 'active' : ''; ?>">My
+                    Dashboard</a>
+                <a href="./alltask.php"
+                    class="nav-link text-gray-400 font-medium text-lg flex items-center <?php echo (basename($_SERVER['PHP_SELF']) == 'alltask.php') ? 'active' : ''; ?>">All
+                    Task</a>
+                <a href="./next7days.php"
+                    class="nav-link text-gray-400 font-medium text-lg flex items-center <?php echo (basename($_SERVER['PHP_SELF']) == 'next7days.php') ? 'active' : ''; ?>">Next
+                    7 Days</a>
+                <a href="./upcoming.php"
+                    class="nav-link text-gray-400 font-medium text-lg flex items-center <?php echo (basename($_SERVER['PHP_SELF']) == 'upcoming.php') ? 'active' : ''; ?>">Upcoming</a>
             </div>
 
             <div class="relative dropdown">
                 <button id="profile-dropdown-toggle" class="focus:outline-none">
-                    <img src="assets/profile.png" alt="Profile" class="h-8 w-8 rounded-full border-2 border-gray-800 cursor-pointer" />
+                    <img src="assets/profile.png" alt="Profile"
+                        class="h-8 w-8 rounded-full border-2 border-gray-800 cursor-pointer" />
                 </button>
                 <div id="dropdown-content" class="absolute right-0 mt-2 hidden bg-gray-800 rounded-md shadow-lg w-48">
-                    <a href="./profile.php" class="block text-lg px-6 py-2 text-gray-300 hover:bg-gray-700 rounded-md">Your Profile</a>
-                    <a href="./logout.php" class="block text-lg px-6 py-2 text-gray-300 hover:bg-gray-700 rounded-md">Sign Out</a>
+                    <a href="./profile.php"
+                        class="block text-lg px-6 py-2 text-gray-300 hover:bg-gray-700 rounded-md">Your Profile</a>
+                    <a href="./logout.php"
+                        class="block text-lg px-6 py-2 text-gray-300 hover:bg-gray-700 rounded-md">Sign Out</a>
                 </div>
             </div>
         </div>
@@ -153,19 +215,35 @@
             <p id="task-status" class="text-lg mb-4"></p>
 
             <div class="mt-4">
-                <button id="mark-complete" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" onclick="toggleTaskComplete()">Mark Complete</button>
+                <button id="mark-complete" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                    onclick="toggleTaskComplete()">Mark Complete</button>
             </div>
         </div>
     </div>
 
+    <div id="mobileMenu" class="hidden lg:hidden flex flex-col space-y-4 bg-white p-4 shadow-lg">
+        <a href="./index.php"
+            class="text-black <?php echo (basename($_SERVER['PHP_SELF']) == 'index.php') ? 'active' : ''; ?>">My
+            Dashboard</a>
+        <a href="./alltask.php"
+            class="text-black <?php echo (basename($_SERVER['PHP_SELF']) == 'alltask.php') ? 'active' : ''; ?>">All
+            Task</a>
+        <a href="./next7days.php"
+            class="text-black <?php echo (basename($_SERVER['PHP_SELF']) == 'next7days.php') ? 'active' : ''; ?>">Next
+            7 Days</a>
+        <a href="./upcoming.php"
+            class="text-black <?php echo (basename($_SERVER['PHP_SELF']) == 'upcoming.php') ? 'active' : ''; ?>">Upcoming</a>
+    </div>
+
+
     <script>
-        document.getElementById('profile-dropdown-toggle').addEventListener('click', function() {
+        document.getElementById('profile-dropdown-toggle').addEventListener('click', function () {
             const dropdownContent = document.getElementById('dropdown-content');
             dropdownContent.classList.toggle('hidden'); // Toggle visibility
         });
 
         // Function to hide dropdown if clicked outside
-        window.addEventListener('click', function(event) {
+        window.addEventListener('click', function (event) {
             const dropdownContent = document.getElementById('dropdown-content');
             const profileButton = document.getElementById('profile-dropdown-toggle');
 
@@ -181,7 +259,7 @@
         // Debouncing function to limit how often we make requests
         function debounce(func, wait) {
             let timeout;
-            return function(...args) {
+            return function (...args) {
                 const later = () => {
                     clearTimeout(timeout);
                     func.apply(this, args);
@@ -191,11 +269,30 @@
             };
         }
 
+        document.getElementById('burgerMenu').addEventListener('click', function () {
+            const mobileMenu = document.getElementById('mobileMenu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        let lastScrollTop = 0;
+        window.addEventListener('scroll', function () {
+            const navbar = document.querySelector('.navbar');
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+            if (scrollTop > lastScrollTop) {
+                navbar.classList.add('navbar-hidden');
+            } else {
+                navbar.classList.remove('navbar-hidden');
+            }
+
+            lastScrollTop = scrollTop;
+        });
+
         // AJAX Search
         const searchBar = document.getElementById('search-bar');
         const searchResults = document.getElementById('search-results');
 
-        searchBar.addEventListener('input', debounce(function() {
+        searchBar.addEventListener('input', debounce(function () {
             const query = searchBar.value.trim();
 
             if (query.length > 0) {
@@ -203,18 +300,18 @@
                 xhr.open('POST', './search_tasks.php', true);
                 xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
-                xhr.onload = function() {
+                xhr.onload = function () {
                     if (this.status === 200) {
                         const results = JSON.parse(this.responseText);
                         searchResults.innerHTML = '';
 
                         if (results.length > 0) {
-                            results.forEach(function(task) {
+                            results.forEach(function (task) {
                                 const taskLink = document.createElement('a');
                                 taskLink.href = '#'; // Prevent default navigation
                                 taskLink.innerHTML = `<strong>${task.task_name}</strong> <br> <small>${task.due_date}</small>`; // Display task name and due date
                                 taskLink.classList.add('text-gray-800', 'block', 'px-4', 'py-2');
-                                taskLink.onclick = function() {
+                                taskLink.onclick = function () {
                                     // Open the modal and populate it with task details
                                     currentTaskId = task.id;
                                     currentTaskStatus = task.status || "Uncompleted"; // Set current task status, default to "Uncompleted" if undefined
@@ -240,50 +337,44 @@
             }
         }, 300));
 
-        // Close modal on close button click
-        document.querySelector('.close').onclick = function() {
+        document.querySelector('.close').onclick = function () {
             document.getElementById('taskModal').style.display = 'none';
         };
 
-        // Close modal when clicking outside
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             if (event.target == document.getElementById('taskModal')) {
                 document.getElementById('taskModal').style.display = 'none';
             }
         };
 
-        // Toggle task completion function
         function toggleTaskComplete() {
-    const xhr = new XMLHttpRequest();
-    const url = (currentTaskStatus === "Uncompleted") ? './mark_complete.php' : './mark_uncomplete.php';
-    xhr.open('POST', url + `?task_id=${currentTaskId}`, true);
+            const xhr = new XMLHttpRequest();
+            const url = (currentTaskStatus === "Uncompleted") ? './mark_complete.php' : './mark_uncomplete.php';
+            xhr.open('POST', url + `?task_id=${currentTaskId}`, true);
 
-    xhr.onload = function() {
-        if (this.status === 200) {
-            const response = JSON.parse(this.responseText);
-            if (response.success) {
-                currentTaskStatus = (currentTaskStatus === "Uncompleted") ? "Completed" : "Uncompleted"; // Update status
-                document.getElementById('mark-complete').innerText = (currentTaskStatus === "Uncompleted") ? "Mark Complete" : "Mark Uncomplete"; // Change button text
-                document.getElementById('task-status').innerText = `Status: ${currentTaskStatus}`; // Update the displayed status
+            xhr.onload = function () {
+                if (this.status === 200) {
+                    const response = JSON.parse(this.responseText);
+                    if (response.success) {
+                        currentTaskStatus = (currentTaskStatus === "Uncompleted") ? "Completed" : "Uncompleted"; // Update status
+                        document.getElementById('mark-complete').innerText = (currentTaskStatus === "Uncompleted") ? "Mark Complete" : "Mark Uncomplete"; // Change button text
+                        document.getElementById('task-status').innerText = `Status: ${currentTaskStatus}`; // Update the displayed status
 
-                // Cari elemen task di daftar search result dan update tampilannya
-                const taskLink = document.querySelector(`a[data-task-id="${currentTaskId}"]`);
-                if (taskLink) {
-                    if (currentTaskStatus === "Completed") {
-                        taskLink.classList.add('line-through'); // Tambahkan styling selesai
-                    } else {
-                        taskLink.classList.remove('line-through'); // Hapus styling selesai
+                        const taskLink = document.querySelector(`a[data-task-id="${currentTaskId}"]`);
+                        if (taskLink) {
+                            if (currentTaskStatus === "Completed") {
+                                taskLink.classList.add('line-through'); // Tambahkan styling selesai
+                            } else {
+                                taskLink.classList.remove('line-through'); // Hapus styling selesai
+                            }
+                        }
                     }
                 }
-            }
+            };
+
+            xhr.send();
         }
-    };
-
-    xhr.send();
-}
-
-
-
     </script>
 </body>
+
 </html>

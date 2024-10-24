@@ -79,26 +79,27 @@ $groupedTasks = groupTasksByDueDate($tasks);
 <body class="bg-gray-100 pt-28">
 
     <div class="container mx-auto px-4">
-        <div>
-            <h1 class="text-3xl font-semibold text-gray-800 mb-2"><span class="auto-type"> </span></h1>
+        <div class="max-w-screen">
+            <h1 class="text-xl lg:text-3xl font-semibold text-gray-800 mb-2"><span class="auto-type"> </span></h1>
             <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
             <script>
-        var typed = new Typed(".auto-type" , {
-            strings : 
-                    ["Halo, <?= htmlspecialchars($_SESSION['username']) ?>!",
-                    "Hi, <?= htmlspecialchars($_SESSION['username']) ?>!",
-                    "Hola, <?= htmlspecialchars($_SESSION['username']) ?>!",
-                    "嗨, <?= htmlspecialchars($_SESSION['username']) ?>!",
-                    ],   
-            typeSpeed: 50,      
-            backSpeed: 10,      
-            loop: true,        
-            startDelay: 50,    
-            backDelay: 100,    
-        })
-    </script>
+                var typed = new Typed(".auto-type", {
+                    strings:
+                        ["Halo, <?= htmlspecialchars($_SESSION['username']) ?>!",
+                            "Hi, <?= htmlspecialchars($_SESSION['username']) ?>!",
+                            "Hola, <?= htmlspecialchars($_SESSION['username']) ?>!",
+                            "嗨, <?= htmlspecialchars($_SESSION['username']) ?>!",
+                        ],
+                    typeSpeed: 50,
+                    backSpeed: 10,
+                    loop: true,
+                    startDelay: 50,
+                    backDelay: 100,
+                })
+            </script>
         </div>
-        <p class="text-gray-600 text-left mb-4">“Tetapi kamu ini, kuatkanlah hatimu, jangan lemah semangatmu, karena ada
+        <p class="text-gray-600 text-left mb-4 text-md">“Tetapi kamu ini, kuatkanlah hatimu, jangan lemah
+            semangatmu, karena ada
             upah bagi usahamu!”</p>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <?php foreach (['today', 'tomorrow', 'this_week'] as $group): ?>
