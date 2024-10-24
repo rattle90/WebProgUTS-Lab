@@ -145,11 +145,11 @@
 
 <body>
     <nav class="navbar bg-gray-900 p-2 fixed top-0 left-0 right-0 z-10">
-        <div class="flex justify-center mb-2">
-            <div class="hidden lg:flex lg:flex-row relative w-1/3">
+        <div class="flex justify-between items-center mb-2">
+            <div class="lg:relative w-1/3">
                 <input id="search-bar" type="text" placeholder="Search tasks..."
-                    class="bg-gray-800 text-gray-400 px-4 py-1 rounded-full w-full pl-10" />
-                <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
+                    class="bg-gray-800 text-gray-400 px-2 lg:px-4 py-1 rounded-full w-full lg:pl-10" />
+                <span class="hidden lg:flex flex-col absolute inset-y-0 left-3 flex items-center text-gray-400">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd"
                             d="M12.9 14.32a8 8 0 111.4-1.4l4.28 4.3a1 1 0 01-1.42 1.4l-4.26-4.3zm-5.4-3.32a6 6 0 1112 0 6 6 0 01-12 0z"
@@ -158,16 +158,20 @@
                 </span>
                 <div id="search-results"></div>
             </div>
+            <div class="lg:hidden">
+                <button id="burgerMenu" class="text-white flex flex-col">
+                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+            </div>
         </div>
 
-        <div class="lg:hidden">
-            <button id="burgerMenu" class="text-white">
-                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-            </button>
-        </div>
+
+
+
 
         <div id="menuItems" class="hidden lg:flex items-center justify-between">
             <div class="flex items-center">
