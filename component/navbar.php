@@ -9,6 +9,7 @@
             background-color: #3b82f6;
             color: white;
             border-radius: 0.5rem;
+            
         }
 
         .nav-link {
@@ -106,7 +107,7 @@
             </div>
 
             <div class="flex-grow flex justify-center space-x-2">
-                <a href="./index.php" class="nav-link text-gray-400 font-medium text-lg flex items-center <?php echo (basename($_SERVER['PHP_SELF']) == 'index.php') ? 'active' : ''; ?>">My Dashboard</a>
+                <a href="./index.php" class="nav-link text-gray-400 font-medium text-lg flex items-center hover:text-white active:text-white <?php echo (basename($_SERVER['PHP_SELF']) == 'index.php') ? 'active' : ''; ?>">My Dashboard</a>
                 <a href="./alltask.php" class="nav-link text-gray-400 font-medium text-lg flex items-center <?php echo (basename($_SERVER['PHP_SELF']) == 'alltask.php') ? 'active' : ''; ?>">All Task</a>
                 <a href="./next7days.php" class="nav-link text-gray-400 font-medium text-lg flex items-center <?php echo (basename($_SERVER['PHP_SELF']) == 'next7days.php') ? 'active' : ''; ?>">Next 7 Days</a>
                 <a href="./upcoming.php" class="nav-link text-gray-400 font-medium text-lg flex items-center <?php echo (basename($_SERVER['PHP_SELF']) == 'upcoming.php') ? 'active' : ''; ?>">Upcoming</a>
@@ -235,10 +236,36 @@
 
         // Toggle task completion function
         function toggleTaskComplete() {
-            currentTaskStatus = (currentTaskStatus === "Uncompleted") ? "Completed" : "Uncompleted"; // Update status
-            document.getElementById('mark-complete').innerText = (currentTaskStatus === "Uncompleted") ? "Mark Complete" : "Mark Uncomplete"; // Change button text
-            document.getElementById('task-status').innerText = `Status: ${currentTaskStatus}`; // Update the displayed status
+    const xhr = new XMLHttpRequest();
+    const url = (currentTaskStatus === "Uncompleted") ? './mark_complete.php' : './mark_uncomplete.php';
+    xhr.open('POST', url + `?task_id=${currentTaskId}`, true);
+
+    xhr.onload = function() {
+        if (this.status === 200) {
+            const response = JSON.parse(this.responseText);
+            if (response.success) {
+                currentTaskStatus = (currentTaskStatus === "Uncompleted") ? "Completed" : "Uncompleted"; // Update status
+                document.getElementById('mark-complete').innerText = (currentTaskStatus === "Uncompleted") ? "Mark Complete" : "Mark Uncomplete"; // Change button text
+                document.getElementById('task-status').innerText = `Status: ${currentTaskStatus}`; // Update the displayed status
+
+                // Cari elemen task di daftar search result dan update tampilannya
+                const taskLink = document.querySelector(`a[data-task-id="${currentTaskId}"]`);
+                if (taskLink) {
+                    if (currentTaskStatus === "Completed") {
+                        taskLink.classList.add('line-through'); // Tambahkan styling selesai
+                    } else {
+                        taskLink.classList.remove('line-through'); // Hapus styling selesai
+                    }
+                }
+            }
         }
+    };
+
+    xhr.send();
+}
+
+
+
     </script>
 </body>
 </html>
