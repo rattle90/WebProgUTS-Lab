@@ -1,14 +1,19 @@
 <?php
 session_start();
-include 'db.php'; // Koneksi database
+include 'db.php'; // Koneksi ke database
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $email = $_POST['email'];
+    $login = $_POST['login']; // Bisa email atau username
     $password = $_POST['password'];
 
-    // Mengambil data pengguna dari database
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
-    $stmt->execute([$email]);
+    // Mengecek apakah input adalah email atau username
+    if (filter_var($login, FILTER_VALIDATE_EMAIL)) {
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
+    } else {
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
+    }
+
+    $stmt->execute([$login]);
     $user = $stmt->fetch();
 
     // Memverifikasi password
@@ -22,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit();
     } else {
         // Jika login gagal
-        echo "<script>alert('Email atau password salah!'); window.location.href='login.php';</script>";
+        echo "<script>alert('Email/Username atau password salah!'); window.location.href='login.php';</script>";
         exit();
     }
 }
