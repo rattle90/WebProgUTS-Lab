@@ -1,9 +1,9 @@
 <?php
 session_start();
-include 'db.php'; // Koneksi ke database
+include 'db.php';
 
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php"); // Arahkan ke halaman login jika belum login
+    header("Location: login.php");
     exit;
 }
 
@@ -60,14 +60,14 @@ if (isset($_GET['id'])) {
 
                     const completeButton = document.getElementById('mark-complete-button');
                     const uncompleteButton = document.getElementById('mark-uncomplete-button');
-                    completeButton.style.display = 'block'; // Show complete button
-                    uncompleteButton.style.display = 'none'; // Hide uncomplete button
+                    completeButton.style.display = 'block'; 
+                    uncompleteButton.style.display = 'none'; 
                 });
         }
     </script>
 </head>
 <body class="bg-gray-100">
-    <?php include 'component/navbar.php'; // Include navbar ?>
+    <?php include 'component/navbar.php'; ?>
 
     <div class="container mx-auto mt-24 p-6">
         <h1 class="text-3xl font-semibold text-gray-800 mb-6">Task Details</h1>

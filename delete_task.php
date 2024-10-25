@@ -1,10 +1,9 @@
 <?php
-include 'db.php'; // Koneksi database
+include 'db.php'; 
 
 if (isset($_GET['task_id'])) {
     $taskId = intval($_GET['task_id']);
     
-    // Query untuk menghapus task dari database
     $stmt = $pdo->prepare("DELETE FROM tasks WHERE id = :id");
     $stmt->bindParam(':id', $taskId, PDO::PARAM_INT);
     

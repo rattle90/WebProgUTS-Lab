@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Next 7 Days Tasks</title>
+    <title>Mengnugas - Next 7 Days</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -76,7 +76,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <div class="container mx-auto mt-5">
         <h1 class="text-white text-3xl font-bold mb-6">Tasks for the Next 7 Days</h1>
-        <!-- Flex berubah dari row (default) menjadi column di layar kecil -->
         <div class="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4 overflow-x-auto lg:overflow-x-visible">
             <?php
             for ($i = 0; $i < 7; $i++) {
@@ -86,7 +85,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $dayName = $date->format('l');
                 $formattedDate = $date->format('Y-m-d');
 
-                // Tambahkan class task-bubble untuk styling responsif
                 echo '<div class="task-bubble bg-white p-4 rounded-lg shadow-md lg:w-64 flex-none max-h-72 overflow-y-auto">';
                 echo "<h2 class='text-lg font-semibold text-gray-800'>$dayName"; 
                 if ($formattedDate === $todayFormatted) {
@@ -179,7 +177,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const isChecked = checkbox.checked;
             const taskNameElement = document.querySelector(`#task-${taskId} .task-name`);
 
-            // Update UI directly
             if (isChecked) {
                 markTaskComplete(taskId);
             } else {
@@ -194,16 +191,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         throw new Error('Network response was not ok');
                     }
                     const checkbox = document.getElementById(`checkbox-${taskId}`);
-                    checkbox.checked = true; // Check the checkbox
+                    checkbox.checked = true; 
                     const taskNameElement = document.querySelector(`#task-${taskId} .task-name`);
                     taskNameElement.classList.add('completed'); // Add line-through class
                 })
                 .catch(error => {
                     console.error('Error marking task complete:', error);
                     const checkbox = document.getElementById(`checkbox-${taskId}`);
-                    checkbox.checked = false; // Revert checkbox if there's an error
+                    checkbox.checked = false; 
                     const taskNameElement = document.querySelector(`#task-${taskId} .task-name`);
-                    taskNameElement.classList.remove('completed'); // Revert line-through class
+                    taskNameElement.classList.remove('completed'); 
                 });
         }
 
@@ -214,16 +211,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         throw new Error('Network response was not ok');
                     }
                     const checkbox = document.getElementById(`checkbox-${taskId}`);
-                    checkbox.checked = false; // Uncheck the checkbox
+                    checkbox.checked = false; 
                     const taskNameElement = document.querySelector(`#task-${taskId} .task-name`);
-                    taskNameElement.classList.remove('completed'); // Remove line-through class
+                    taskNameElement.classList.remove('completed'); 
                 })
                 .catch(error => {
                     console.error('Error marking task uncomplete:', error);
                     const checkbox = document.getElementById(`checkbox-${taskId}`);
-                    checkbox.checked = true; // Revert checkbox if there's an error
+                    checkbox.checked = true; 
                     const taskNameElement = document.querySelector(`#task-${taskId} .task-name`);
-                    taskNameElement.classList.add('completed'); // Revert line-through class
+                    taskNameElement.classList.add('completed'); 
                 });
         }
 

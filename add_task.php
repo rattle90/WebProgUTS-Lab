@@ -1,7 +1,7 @@
 <?php
 include 'db.php';
 
-session_start(); // Pastikan session sudah dimulai
+session_start();
 
 // Cek apakah pengguna sudah login
 if (!isset($_SESSION['user_id'])) {
@@ -11,10 +11,9 @@ if (!isset($_SESSION['user_id'])) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $taskName = $_POST['task_name'];
-    $notes = $_POST['notes'] ?? ''; // Buat catatan bersifat opsional
+    $notes = $_POST['notes'] ?? ''; 
     $dueDate = $_POST['due_date'];
 
-    // Validasi tanggal jatuh tempo
     if (empty($dueDate) || $dueDate == '0000-00-00') {
         echo json_encode(['success' => false, 'message' => 'Due date is invalid.']);
         exit;
@@ -28,10 +27,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $result = $addQuery->execute([$taskName, $notes, $dueDate, $userId]);
 
     if ($result) {
-        // Berikan respon sukses sebagai JSON
         echo json_encode(['success' => true]);
     } else {
-        // Berikan respon error sebagai JSON
         echo json_encode(['success' => false]);
     }
 }

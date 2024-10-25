@@ -79,7 +79,6 @@
             background-color: #f3f4f6;
         }
 
-        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -124,35 +123,27 @@
 
         .logo-text {
             font-size: 1.5rem;
-            /* Ukuran font */
             font-weight: 700;
-            /* Berat font */
             color: white;
-            /* Warna teks */
             text-decoration: none;
-            /* Menghilangkan garis bawah */
             margin-left: 8px;
-            /* Spasi antara logo dan teks */
             transition: color 0.3s;
-            /* Transisi warna */
         }
 
         .logo-text:hover {
             color: #3b82f6;
-            /* Warna saat hover */
         }
 
         @media (max-width: 768px) {
-        /* Lebar input dan hasil search menyesuaikan ukuran layar mobile */
         #search-bar-mobile {
-            width: 100%;  /* Mengisi seluruh lebar layar */
+            width: 100%;  
             padding-left: 40px;
         }
 
         #search-results-mobile {
-            width: 100%;  /* Lebar 100% untuk menyesuaikan layar */
-            max-height: 200px;  /* Batas tinggi maksimal */
-            overflow-y: auto;  /* Menambahkan scroll jika terlalu banyak hasil */
+            width: 100%; 
+            max-height: 200px;  
+            overflow-y: auto;  
             background-color: white;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             position: absolute;
@@ -172,7 +163,6 @@
             background-color: #f3f4f6;
         }
 
-        /* Navbar style khusus untuk mobile */
         .navbar {
             padding: 1rem;
             position: fixed;
@@ -189,19 +179,18 @@
         }
     }
 
-    /* Style default untuk desktop */
     @media (min-width: 769px) {
         #search-bar-mobile {
-            display: none;  /* Sembunyikan input pencarian untuk mobile saat di desktop */
+            display: none; 
         }
 
         #search-results-mobile {
-            display: none;  /* Sembunyikan hasil pencarian untuk mobile saat di desktop */
+            display: none;  
         }
     }
 
     #dropdown-content {
-            z-index: 100; /* Higher z-index to stay on top */
+            z-index: 100; 
         }
     </style>
 </head>
@@ -235,11 +224,10 @@
             </div>
 
             <div class="flex items-center">
-                <span class="logo">
-                    <span class="logo-text">Mengnugas</span>
-                </span>
+            <span class="logo">
+                <a href="./index.php" class="logo-text">Mengnugas</a>
+            </span>
             </div>
-
             <div id="menuItems" class="hidden lg:flex items-center justify-center space-x-2">
                 <a href="./index.php"
                     class="nav-link text-gray-400 font-medium text-lg flex items-center hover:text-white active:text-white <?php echo (basename($_SERVER['PHP_SELF']) == 'index.php') ? 'active' : ''; ?>">
@@ -328,23 +316,20 @@
     <script>
         document.getElementById('profile-dropdown-toggle').addEventListener('click', function () {
             const dropdownContent = document.getElementById('dropdown-content');
-            dropdownContent.classList.toggle('hidden'); // Toggle visibility
+            dropdownContent.classList.toggle('hidden');
         });
 
-        // Function to hide dropdown if clicked outside
         window.addEventListener('click', function (event) {
             const dropdownContent = document.getElementById('dropdown-content');
             const profileButton = document.getElementById('profile-dropdown-toggle');
 
-            // Check if the click was outside the dropdown and the button
             if (!dropdownContent.contains(event.target) && !profileButton.contains(event.target)) {
-                dropdownContent.classList.add('hidden'); // Hide dropdown
+                dropdownContent.classList.add('hidden'); 
             }
         });
 
-        let currentTaskId = null; // Store the currently viewed task ID
+        let currentTaskId = null; 
 
-        // Debouncing function to limit how often we make requests
         function debounce(func, wait) {
             let timeout;
             return function (...args) {
@@ -376,7 +361,7 @@
             lastScrollTop = scrollTop;
         });
 
-        // AJAX Search (updated to include task completion status)
+        // AJAX Search 
         const searchBar = document.getElementById('search-bar');
         const searchResults = document.getElementById('search-results');
         const searchBarMobile = document.getElementById('search-bar-mobile');
@@ -398,7 +383,7 @@
                         if (results.length > 0) {
                             results.forEach(function (task) {
                                 const taskLink = document.createElement('a');
-                                taskLink.href = '#'; // Prevent default navigation
+                                taskLink.href = '#'; 
                                 taskLink.innerHTML = `<strong>${task.task_name}</strong> <br> <small>${task.due_date}</small>`;
                                 taskLink.classList.add('text-gray-800', 'block', 'px-4', 'py-2');
                                 taskLink.onclick = function () {
@@ -443,13 +428,12 @@
                         if (results.length > 0) {
                             results.forEach(function (task) {
                                 const taskLink = document.createElement('a');
-                                taskLink.href = '#'; // Prevent default navigation
+                                taskLink.href = '#'; 
                                 taskLink.innerHTML = `<strong>${task.task_name}</strong> <br> <small>${task.due_date}</small>`;
                                 taskLink.classList.add('text-gray-800', 'block', 'px-4', 'py-2');
 
-                                // Add click event for the mobile results to show the modal
-                                taskLink.onclick = function () {
-                                    // Populate modal with task details
+                              
+                                taskLink.onclick = function () {                            
                                     currentTaskId = task.id;
                                     currentTaskStatus = task.is_completed == 1 ? "Completed" : "Uncompleted";
                                     document.getElementById('task-title').innerText = task.task_name;
@@ -479,7 +463,6 @@
             document.getElementById('taskModal').style.display = 'none';
         };
 
-       // Close modal when clicking outside
         window.onclick = function (event) {
             const modal = document.getElementById('taskModal');
             if (event.target == modal) {

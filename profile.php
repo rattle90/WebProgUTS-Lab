@@ -1,12 +1,11 @@
 <?php
 ob_start();
 session_start();
-include 'db.php'; // Koneksi ke database
+include 'db.php'; 
 include 'component/navbar.php';
 
-// Cek apakah pengguna sudah login
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php"); // Arahkan ke halaman login jika belum login
+    header("Location: login.php"); 
     exit;
 }
 
@@ -41,7 +40,6 @@ if (!$user) {
         <div class="bg-white shadow-md rounded-lg p-6">
             <p class="text-lg"><strong>Username:</strong> <?= htmlspecialchars($user['username']) ?></p>
             <p class="text-lg"><strong>Email:</strong> <?= htmlspecialchars($user['email']) ?></p>
-            <!-- Tambahkan informasi lain yang diperlukan di sini -->
         </div>
 
         <div class="mt-6">

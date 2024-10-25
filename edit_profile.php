@@ -1,9 +1,8 @@
 <?php
 session_start();
-include 'db.php'; // Koneksi ke database
+include 'db.php'; 
 include 'component/navbar.php';
 
-// Cek apakah pengguna sudah login
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;

@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'db.php'; // Koneksi ke database
+include 'db.php'; 
 
 if (isset($_POST['query'])) {
     $query = $_POST['query'];
@@ -14,13 +14,12 @@ if (isset($_POST['query'])) {
     foreach ($tasks as &$task) {
         if ($task['due_date']) {
             $date = new DateTime($task['due_date']);
-            $task['due_date'] = $date->format('j F'); // Format to "day Month"
+            $task['due_date'] = $date->format('j F'); 
         } else {
-            $task['due_date'] = 'No due date'; // Optional: handle tasks with no due date
+            $task['due_date'] = 'No due date'; 
         }
     }
 
-    // Mengirimkan hasil pencarian dalam bentuk JSON, termasuk status is_completed
     echo json_encode($tasks);
 }
 ?>

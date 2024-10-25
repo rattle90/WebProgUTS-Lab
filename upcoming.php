@@ -1,29 +1,28 @@
 <?php
 ob_start();
-session_start(); // Mulai session
+session_start(); 
 include 'db.php';
 include 'component/navbar.php';
 
-// Pastikan pengguna telah login dan ID pengguna ada di session
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit();
 }
 
-$userId = $_SESSION['user_id']; // Ambil ID pengguna dari session
+$userId = $_SESSION['user_id']; 
 
 // Set timezone
 date_default_timezone_set('Asia/Jakarta');
 
 // Get the current date and set the start and end date
 $today = date('Y-m-d');
-$start_date = $today; // Set start date to today
-$end_date = date('Y-m-d', strtotime('+1 month', strtotime($start_date))); // One month ahead
+$start_date = $today;
+$end_date = date('Y-m-d', strtotime('+1 month', strtotime($start_date))); 
 
-// Get selected month or default to the current month
+
 $selected_month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
 
-// If a month is selected, adjust the start and end date accordingly
+
 if ($selected_month) {
     $start_date = $selected_month . '-01';
     $end_date = date('Y-m-t', strtotime($start_date)); // Last date of the selected month
@@ -32,12 +31,12 @@ if ($selected_month) {
     }
 }
 
-// Fetch tasks for the selected range from the database for the logged-in user
+
 $query = $pdo->prepare("SELECT * FROM tasks WHERE user_id = :user_id AND due_date BETWEEN :start_date AND :end_date ORDER BY due_date ASC");
 $query->execute(['user_id' => $userId, 'start_date' => $start_date, 'end_date' => $end_date]);
 $tasks = $query->fetchAll(PDO::FETCH_ASSOC);
 
-// Group tasks by date
+
 $grouped_tasks = [];
 foreach ($tasks as $task) {
     $due_date = $task['due_date'];
@@ -47,10 +46,10 @@ foreach ($tasks as $task) {
     $grouped_tasks[$due_date][] = $task;
 }
 
-// Get all months for the dropdown
+
 $months = [];
 $current_year_month = date('Y-m');
-for ($i = 0; $i <= 6; $i++) { // Show current month and 6 months ahead
+for ($i = 0; $i <= 6; $i++) { 
     $next_month = date('Y-m', strtotime("+$i month", strtotime($current_year_month)));
     $months[] = $next_month;
 }
@@ -61,7 +60,7 @@ for ($i = 0; $i <= 6; $i++) { // Show current month and 6 months ahead
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Dashboard - Upcoming</title>
+    <title>Mengnugas - Upcoming</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -208,7 +207,7 @@ for ($i = 0; $i <= 6; $i++) { // Show current month and 6 months ahead
         document.getElementById('add-task-form').addEventListener('submit', function (e) {
             e.preventDefault();
             const formData = new FormData(e.target);
-            formData.append('user_id', '<?= $userId ?>'); // Tambahkan ID pengguna ke form data
+            formData.append('user_id', '<?= $userId ?>'); 
 
             fetch('add_task.php', {
                 method: 'POST',

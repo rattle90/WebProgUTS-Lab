@@ -1,12 +1,11 @@
 <?php
 ob_start();
 session_start();
-include 'db.php'; // Koneksi database
+include 'db.php'; 
 include 'component/navbar.php';
 
-// Cek apakah pengguna sudah login
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php"); // Arahkan ke halaman login jika belum login
+    header("Location: login.php"); 
     exit;
 }
 
@@ -16,7 +15,6 @@ $query = $pdo->prepare("SELECT * FROM tasks WHERE user_id = ?");
 $query->execute([$userId]);
 $tasks = $query->fetchAll(PDO::FETCH_ASSOC);
 
-// Fungsi untuk mengelompokkan tugas berdasarkan tanggal jatuh tempo
 function groupTasksByDueDate($tasks) {
     $groupedTasks = [
         'today' => [],
@@ -76,7 +74,7 @@ switch ($filter) {
         $filteredTasks = ['uncompleted' => array_filter($tasks, fn($task) => $task['is_completed'] == 0)];
         break;
     default:
-        $filteredTasks = $groupedTasks; // Menampilkan semua tugas jika tidak ada filter
+        $filteredTasks = $groupedTasks; 
         break;
 }
 ?>
@@ -86,7 +84,7 @@ switch ($filter) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Dashboard</title>
+    <title>Mengnugas - All Task</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
@@ -97,7 +95,7 @@ switch ($filter) {
 <body class="bg-blue-600 pt-20 min-h-screen flex flex-col">
     <div class="flex flex-col md:flex-row h-full w-11/12 space-y-6 md:space-x-6 mx-auto py-10">
 
-        <!-- Bagian kiri: Daftar task -->
+        <!-- Daftar task -->
         <div class="w-full md:w-1/3 bg-gray-900 text-white p-4 rounded-lg shadow-lg flex flex-col">
             <div class="flex justify-between mb-4">
                 <h1 class="text-xl font-semibold">All my tasks</h1>
@@ -138,7 +136,7 @@ switch ($filter) {
             <button class="mt-4 p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg" id="add-task-btn">+ Add task</button>
         </div>
 
-        <!-- Bagian kanan: Detail task -->
+        <!-- Detail task -->
         <div class="w-full md:w-2/3 bg-gray-100 p-6 rounded-lg shadow-lg" id="task-details">
             <div class="flex justify-between">
                 <h2 class="text-2xl font-semibold">Task Details</h2>
@@ -247,13 +245,12 @@ switch ($filter) {
                 cancelButtonText: 'Cancel',
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Jika user mengkonfirmasi, hapus task
                     fetch(`delete_task.php?task_id=${taskId}`, { method: 'POST' })
                         .then(response => response.json())
                         .then(result => {
                             if (result.success) {
                                 const taskItem = document.getElementById(`task-${taskId}`);
-                                taskItem.remove(); // Hapus elemen task dari DOM
+                                taskItem.remove(); 
 
                                 Swal.fire(
                                     'Deleted!',
@@ -274,18 +271,16 @@ switch ($filter) {
         
         document.querySelectorAll('.task-checkbox').forEach(checkbox => {
     checkbox.addEventListener('change', function (e) {
-        e.stopPropagation();  // Hindari konflik dengan event lain
+        e.stopPropagation(); 
         const taskId = this.getAttribute('data-task-id');
         const label = document.querySelector(`label[for="checkbox-${taskId}"]`);
 
-        // Update tampilan garis coret berdasarkan status checkbox
         if (this.checked) {
             label.classList.add('line-through', 'text-gray-400');
         } else {
             label.classList.remove('line-through', 'text-gray-400');
         }
 
-        // Kirim request ke server untuk update status di database
         const url = this.checked 
             ? `mark_complete.php?task_id=${taskId}` 
             : `mark_uncomplete.php?task_id=${taskId}`;
@@ -296,7 +291,6 @@ switch ($filter) {
                 if (!data.success) {
                     Swal.fire('Error', 'Failed to update task status.', 'error');
 
-                    // Kembalikan status checkbox jika update gagal
                     this.checked = !this.checked;
                     if (this.checked) {
                         label.classList.add('line-through', 'text-gray-400');
@@ -309,7 +303,6 @@ switch ($filter) {
                 console.error('Error:', error);
                 Swal.fire('Error', 'Failed to update task status. Try again.', 'error');
 
-                // Kembalikan status jika terjadi error
                 this.checked = !this.checked;
                 if (this.checked) {
                     label.classList.add('line-through', 'text-gray-400');
