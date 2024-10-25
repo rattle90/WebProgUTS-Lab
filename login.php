@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body class="bg-gray-50 flex items-center justify-center min-h-screen p-6">
 
-    <div class="w-full max-w-md bg-white rounded-lg shadow-md p-8 space-y-6 transform transition duration-300 hover:scale-[1.02]">
+    <div class="w-full max-w-md bg-white rounded-lg shadow-md p-8 space-y-6 transform transition duration-300">
         <h1 class="text-3xl font-semibold text-center text-gray-800">Mengnugas</h1>
         <p class="text-center text-gray-500 text-sm">Stay organized, stay productive</p>
 

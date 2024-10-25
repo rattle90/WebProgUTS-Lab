@@ -11,7 +11,7 @@
     <!-- Background pattern -->
     <div class="absolute inset-0 bg-[url('https://source.unsplash.com/featured/?abstract,security')] bg-cover opacity-10 pointer-events-none"></div>
 
-    <div class="w-full max-w-md bg-white rounded-lg shadow-md p-8 space-y-6 transform transition duration-300 hover:scale-[1.02]">
+    <div class="w-full max-w-md bg-white rounded-lg shadow-md p-8 space-y-6 transform transition duration-300">
         <h1 class="text-3xl font-semibold text-center text-gray-800">Reset Password</h1>
         <p class="text-center text-gray-500 text-sm">Regain access to your Mengnugas account</p>
 
