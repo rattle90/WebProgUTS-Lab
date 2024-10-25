@@ -243,7 +243,6 @@ $groupedTasks = groupTasksByDueDate($tasks);
             const modal = document.getElementById('task-modal');
             const content = document.getElementById('task-content');
 
-            // Fetch task details from server (implement this part)
             fetch(`get_task.php?task_id=${taskId}`)
                 .then(response => response.json())
                 .then(data => {

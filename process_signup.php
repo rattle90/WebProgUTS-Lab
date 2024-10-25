@@ -45,7 +45,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </head>
 <body class="bg-gradient-to-br from-green-100 to-blue-100 min-h-screen flex items-center justify-center p-4 sm:p-0">
 
-    <!-- Background pattern -->
     <div class="absolute inset-0 bg-[url('https://source.unsplash.com/featured/?abstract,success')] bg-cover opacity-10 pointer-events-none"></div>
 
     <div class="relative w-full max-w-lg bg-white shadow-2xl rounded-lg overflow-hidden transform transition duration-300 hover:scale-105">
