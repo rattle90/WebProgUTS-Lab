@@ -48,12 +48,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <!-- Background pattern -->
     <div class="absolute inset-0 bg-[url('https://source.unsplash.com/featured/?abstract,success')] bg-cover opacity-10 pointer-events-none"></div>
 
-    <div class="bg-white shadow-2xl rounded-lg overflow-hidden w-full max-w-lg transform transition duration-500 hover:scale-[1.02]">
+    <div class="relative w-full max-w-lg bg-white shadow-2xl rounded-lg overflow-hidden transform transition duration-300 hover:scale-105">
         <div class="p-8 text-center">
             <h1 class="text-3xl font-semibold <?php echo ($existingUser) ? 'text-red-500' : 'text-green-600'; ?>">
                 <?php echo ($existingUser) ? 'Pendaftaran Gagal!' : 'Pendaftaran Berhasil'; ?>
             </h1>
-            <p class="mt-4 text-lg text-gray-700 font-medium <?php echo ($existingUser) ? 'text-red-500' : 'text-green-500'; ?>">
+            <p class="mt-4 text-lg <?php echo ($existingUser) ? 'text-red-500' : 'text-green-500'; ?>">
                 <?php echo $status; ?>
             </p>
             <div class="mt-6">
