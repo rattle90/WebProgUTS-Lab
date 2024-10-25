@@ -2,7 +2,7 @@
 session_start();
 include 'db.php';
 
-$error = ''; // Variabel untuk menyimpan pesan error
+$error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $login = trim($_POST['login']);
@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: index.php');
         exit();
     } else {
-        $error = 'Email/Username atau password salah!'; // Pesan error ditampilkan langsung
+        $error = 'Email/Username atau password salah!'; 
     }
 }
 ?>
@@ -43,7 +43,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <h1 class="text-3xl font-semibold text-center text-gray-800">Mengnugas</h1>
         <p class="text-center text-gray-500 text-sm">Stay organized, stay productive</p>
 
-        <!-- Pesan Error -->
         <?php if (!empty($error)): ?>
             <p class="text-center text-red-500"><?php echo $error; ?></p>
         <?php endif; ?>

@@ -26,7 +26,7 @@ $status = "";
 $link = "";
 
 if ($result->num_rows > 0) {
-    // Update password baru jika valid
+    // Update password baru
     $update_sql = "UPDATE users SET password = ? WHERE email = ? AND username = ?";
     $update_stmt = $conn->prepare($update_sql);
     $update_stmt->bind_param('sss', $new_password, $email, $user);
